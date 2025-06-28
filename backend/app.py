@@ -699,10 +699,12 @@ def health_check():
 
 if __name__ == '__main__':
     with app.app_context():
-        # Drop all tables and recreate them to ensure schema matches
-        db.drop_all()
+        # Create tables if they don't exist (don't drop in production)
         db.create_all()
         # Generate mock data if no clients exist
         if Client.query.count() == 0:
             MockDataGenerator.generate_mock_clients()
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+    
+    # Use Railway's PORT environment variable or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port) 

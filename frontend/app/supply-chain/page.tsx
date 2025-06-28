@@ -139,7 +139,7 @@ export default function SupplyChainIntel() {
   })
 
   const riskLevels = ['Low', 'Medium', 'High', 'Critical']
-  const sectors = [...new Set(supplyChainData.map(item => item.sector))]
+  const sectors = Array.from(new Set(supplyChainData.map(item => item.sector)))
 
   if (loading) {
     return (
