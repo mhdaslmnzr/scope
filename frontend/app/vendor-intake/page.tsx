@@ -16,6 +16,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface VendorFormData {
   company_name: string
@@ -53,6 +54,7 @@ export default function VendorIntakePage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [newVendorId, setNewVendorId] = useState<number | null>(null)
 
   const industries = [
     'Technology', 'Financial Services', 'Healthcare', 'Manufacturing', 
@@ -119,17 +121,21 @@ export default function VendorIntakePage() {
     setSubmitStatus('idle')
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Here you would make the actual API call to your backend
-      // const response = await fetch('/api/vendors', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // })
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      const response = await fetch(`${apiBase}/api/vendors`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      setNewVendorId(result.vendor_id)
       setSubmitStatus('success')
+      
       // Reset form after successful submission
       setTimeout(() => {
         setFormData({
@@ -149,13 +155,35 @@ export default function VendorIntakePage() {
         })
         setCurrentStep(1)
         setSubmitStatus('idle')
+        setNewVendorId(null)
       }, 3000)
     } catch (error) {
+      console.error('Error submitting vendor:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  const handleExport = async (format: 'pdf' | 'json') => {
+    if (!vendorId) return;
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const url = `${apiBase}/api/vendors/${vendorId}/report?format=${format}`;
+    const res = await fetch(url);
+    if (format === 'pdf') {
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `vendor_${vendorId}_report.pdf`;
+      link.click();
+    } else {
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `vendor_${vendorId}_report.json`;
+      link.click();
+    }
+  };
 
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
@@ -484,6 +512,10 @@ export default function VendorIntakePage() {
     }
   }
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const vendorId = searchParams.get('id');
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-8">
@@ -497,6 +529,25 @@ export default function VendorIntakePage() {
             <span>Bulk Import</span>
           </button>
         </div>
+
+        {vendorId && (
+          <div className="flex gap-2 mb-6">
+            <button
+              className="flex items-center space-x-1 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+              onClick={() => handleExport('pdf')}
+            >
+              <FileText className="h-4 w-4" />
+              <span>Download PDF</span>
+            </button>
+            <button
+              className="flex items-center space-x-1 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+              onClick={() => handleExport('json')}
+            >
+              <FileText className="h-4 w-4" />
+              <span>Download JSON</span>
+            </button>
+          </div>
+        )}
 
         {renderStepIndicator()}
 

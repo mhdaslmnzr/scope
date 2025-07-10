@@ -134,8 +134,8 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Vendor Risk Dashboard</h1>
-            <p className="text-gray-600">Comprehensive supply chain security intelligence</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vendor Risk Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-400">Comprehensive supply chain security intelligence</p>
           </div>
           <div className="flex space-x-3">
             <button
@@ -145,7 +145,7 @@ export default function Dashboard() {
               <RefreshCw className="h-4 w-4" />
               <span>Refresh</span>
             </button>
-            <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
               <Download className="h-4 w-4" />
               <span>Export</span>
             </button>
@@ -155,63 +155,63 @@ export default function Dashboard() {
         {/* Key Metrics */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Vendors</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total_clients}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Vendors</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total_clients}</p>
                 </div>
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
               <div className="mt-4">
-                <span className="text-sm text-gray-500">Active monitoring</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Active monitoring</span>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Average Risk Score</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.average_risk_score}/100</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Average Risk Score</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.average_risk_score}/100</p>
                 </div>
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Target className="h-6 w-6 text-orange-600" />
+                <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                  <Target className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
               </div>
               <div className="mt-4">
-                <span className="text-sm text-gray-500">Across all vendors</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Across all vendors</span>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">High Risk Vendors</p>
-                  <p className="text-2xl font-bold text-red-600">{stats.high_risk_clients}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">High Risk Vendors</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.high_risk_clients}</p>
                 </div>
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
               </div>
               <div className="mt-4">
-                <span className="text-sm text-gray-500">Requires attention</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Requires attention</span>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Threats</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.active_threats}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Threats</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.active_threats}</p>
                 </div>
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Zap className="h-6 w-6 text-purple-600" />
+                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                  <Zap className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
               <div className="mt-4">
-                <span className="text-sm text-gray-500">Being monitored</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Being monitored</span>
               </div>
             </div>
           </div>
@@ -220,8 +220,8 @@ export default function Dashboard() {
         {/* Risk Distribution Chart */}
         {stats && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Risk Distribution</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Risk Distribution</h2>
               <div className="space-y-4">
                 {riskLevels.map(level => (
                   <div key={level} className="flex items-center justify-between">
@@ -229,10 +229,10 @@ export default function Dashboard() {
                       <div className={`p-2 rounded-lg ${getRiskColor(level)}`}>
                         {getRiskIcon(level)}
                       </div>
-                      <span className="font-medium text-gray-900">{level}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{level}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div className="w-32 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full ${
                             level === 'Low' ? 'bg-green-500' :
@@ -242,7 +242,7 @@ export default function Dashboard() {
                           style={{ width: `${(stats.risk_distribution[level as keyof typeof stats.risk_distribution] / stats.total_clients) * 100}%` }}
                         ></div>
                       </div>
-                      <span className="text-sm text-gray-600 w-8">
+                      <span className="text-sm text-gray-600 dark:text-gray-400 w-8">
                         {stats.risk_distribution[level as keyof typeof stats.risk_distribution]}
                       </span>
                     </div>
@@ -251,20 +251,20 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Sector Analysis</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sector Analysis</h2>
               <div className="space-y-4">
                 {Object.entries(stats.sector_distribution).map(([sector, count]) => (
                   <div key={sector} className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">{sector}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{sector}</span>
                     <div className="flex items-center space-x-2">
-                      <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div className="w-32 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                         <div 
                           className="h-2 bg-primary-500 rounded-full"
                           style={{ width: `${(count / stats.total_clients) * 100}%` }}
                         ></div>
                       </div>
-                      <span className="text-sm text-gray-600 w-8">{count}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400 w-8">{count}</span>
                     </div>
                   </div>
                 ))}
@@ -274,10 +274,10 @@ export default function Dashboard() {
         )}
 
         {/* Vendor List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <h2 className="text-lg font-semibold text-gray-900">Vendor Risk Assessment</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Vendor Risk Assessment</h2>
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 {/* Search */}
                 <div className="relative">
@@ -287,7 +287,7 @@ export default function Dashboard() {
                     placeholder="Search vendors..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
                 
@@ -295,7 +295,7 @@ export default function Dashboard() {
                 <select
                   value={filterRisk}
                   onChange={(e) => setFilterRisk(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="all">All Risk Levels</option>
                   {riskLevels.map(level => (
@@ -307,7 +307,7 @@ export default function Dashboard() {
                 <select
                   value={filterSector}
                   onChange={(e) => setFilterSector(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="all">All Sectors</option>
                   {sectors.map(sector => (
@@ -319,44 +319,44 @@ export default function Dashboard() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Vendor
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Sector
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Risk Score
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Risk Level
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Last Assessment
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredClients.map((client) => (
-                  <tr key={client.id} className="hover:bg-gray-50">
+                  <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{client.company_name}</div>
-                        <div className="text-sm text-gray-500">{client.domain}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{client.company_name}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{client.domain}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{client.sector}</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{client.sector}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                           <div 
                             className={`h-2 rounded-full ${
                               client.risk_score < 30 ? 'bg-green-500' :
@@ -366,7 +366,7 @@ export default function Dashboard() {
                             style={{ width: `${client.risk_score}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{client.risk_score}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{client.risk_score}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -375,11 +375,11 @@ export default function Dashboard() {
                         <span className="ml-1">{client.risk_level}</span>
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {new Date(client.last_assessment).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-primary-600 hover:text-primary-900 flex items-center space-x-1">
+                      <button className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 flex items-center space-x-1">
                         <Eye className="h-4 w-4" />
                         <span>View Details</span>
                         <ChevronRight className="h-3 w-3" />
@@ -394,84 +394,84 @@ export default function Dashboard() {
           {filteredClients.length === 0 && (
             <div className="text-center py-12">
               <Globe className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No vendors found matching your criteria</p>
+              <p className="text-gray-500 dark:text-gray-400">No vendors found matching your criteria</p>
             </div>
           )}
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+              <button className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <div className="flex items-center space-x-3">
-                  <Globe className="h-5 w-5 text-primary-600" />
-                  <span className="text-sm font-medium text-gray-900">Add New Vendor</span>
+                  <Globe className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">Add New Vendor</span>
                 </div>
               </button>
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+              <button className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <div className="flex items-center space-x-3">
-                  <BarChart3 className="h-5 w-5 text-primary-600" />
-                  <span className="text-sm font-medium text-gray-900">Generate Risk Report</span>
+                  <BarChart3 className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">Generate Risk Report</span>
                 </div>
               </button>
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+              <button className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 <div className="flex items-center space-x-3">
-                  <AlertTriangle className="h-5 w-5 text-primary-600" />
-                  <span className="text-sm font-medium text-gray-900">View Threat Alerts</span>
+                  <AlertTriangle className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">View Threat Alerts</span>
                 </div>
               </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Risk assessment completed</p>
-                  <p className="text-xs text-gray-500">Pharmexis BioTech - 2 hours ago</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Risk assessment completed</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Pharmexis BioTech - 2 hours ago</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Security posture update</p>
-                  <p className="text-xs text-gray-500">TechFlow Solutions - 4 hours ago</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">Security posture update</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">TechFlow Solutions - 4 hours ago</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">New vendor added</p>
-                  <p className="text-xs text-gray-500">DataVault Cloud - 6 hours ago</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">New vendor added</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">DataVault Cloud - 6 hours ago</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">System Status</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">API Status</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span className="text-sm text-gray-600 dark:text-gray-400">API Status</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Operational
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Database</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Database</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Connected
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Last Sync</span>
-                <span className="text-sm text-gray-900">2 minutes ago</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Last Sync</span>
+                <span className="text-sm text-gray-900 dark:text-white">2 minutes ago</span>
               </div>
             </div>
           </div>
