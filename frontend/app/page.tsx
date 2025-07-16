@@ -15,6 +15,10 @@ import {
 } from 'chart.js';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+import Sidebar from '../components/Sidebar';
+import CybersecurityHome from '../components/intelligence/CybersecurityHome';
+import VulnerabilitiesTable from '../components/intelligence/VulnerabilitiesTable';
+
 const quickStats = [
   { label: 'Total Vendors', value: 42, icon: <Users className="w-5 h-5 text-blue-600" /> },
   { label: 'High Risk Vendors', value: 5, icon: <AlertTriangle className="w-5 h-5 text-red-600" /> },
@@ -387,6 +391,30 @@ const pillarGroups = [
   },
 ];
 
+// Calculation functions for scoring
+function calculatePillarScore(scoreDetails, pillarCategories) {
+  const items = scoreDetails.filter(item => pillarCategories.includes(item.category));
+  const weightedSum = items.reduce((sum, item) => sum + item.score * item.weight, 0);
+  const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
+  return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+}
+
+function calculateAggregateScore(scoreDetails) {
+  const weightedSum = scoreDetails.reduce((sum, item) => sum + item.score * item.weight, 0);
+  const totalWeight = scoreDetails.reduce((sum, item) => sum + item.weight, 0);
+  return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+}
+
+function applyCriticalityMultiplier(aggregateScore, criticality) {
+  const multipliers = {
+    'Critical': 1.25,
+    'High': 1.10,
+    'Medium': 1.00,
+    'Low': 0.85,
+  };
+  return Math.round(aggregateScore * (multipliers[criticality] || 1.0));
+}
+
 function VendorDetails({ vendor, onBack }: { vendor: any, onBack: () => void }) {
   const [editMode, setEditMode] = useState(false);
   const [notes, setNotes] = useState([
@@ -425,12 +453,20 @@ function VendorDetails({ vendor, onBack }: { vendor: any, onBack: () => void }) 
     scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } },
   };
 
+  // Calculate scores dynamically
+  const cybersecurity = calculatePillarScore(vendor.scoreDetails, pillarGroups[0].keys);
+  const compliance = calculatePillarScore(vendor.scoreDetails, pillarGroups[1].keys);
+  const geopolitical = calculatePillarScore(vendor.scoreDetails, pillarGroups[2].keys);
+  const reputation = calculatePillarScore(vendor.scoreDetails, pillarGroups[3].keys);
+  const aggregate = calculateAggregateScore(vendor.scoreDetails);
+  const aggregateWithMultiplier = applyCriticalityMultiplier(aggregate, vendor.criticality);
+
   // Only show 4 pillar cards, colored by risk
   const pillarScores = [
-    { name: 'Cybersecurity', icon: <Shield className="w-6 h-6 mb-2" />, score: vendor.scores?.cybersecurity ?? 'N/A' },
-    { name: 'Compliance', icon: <FileText className="w-6 h-6 mb-2" />, score: vendor.scores?.compliance ?? 'N/A' },
-    { name: 'Geopolitical', icon: <Globe className="w-6 h-6 mb-2" />, score: vendor.scores?.geopolitical ?? 'N/A' },
-    { name: 'Reputation', icon: <AlertTriangle className="w-6 h-6 mb-2" />, score: vendor.scores?.reputation ?? 'N/A' },
+    { name: 'Cybersecurity', icon: <Shield className="w-6 h-6 mb-2" />, score: cybersecurity },
+    { name: 'Compliance', icon: <FileText className="w-6 h-6 mb-2" />, score: compliance },
+    { name: 'Geopolitical', icon: <Globe className="w-6 h-6 mb-2" />, score: geopolitical },
+    { name: 'Reputation', icon: <AlertTriangle className="w-6 h-6 mb-2" />, score: reputation },
   ];
 
   // Group score details by pillar
@@ -459,7 +495,7 @@ function VendorDetails({ vendor, onBack }: { vendor: any, onBack: () => void }) 
             <Users className="w-6 h-6 text-blue-600" />
             <span>{vendor.name}</span>
             <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${criticalityColors[vendor.criticality]}`}>{vendor.criticality}</span>
-            <span className={`ml-2 px-3 py-1 rounded-full text-lg font-bold border ${riskColor(vendor.scores?.aggregate || 0)}`}>{vendor.scores?.aggregate ?? 'N/A'}</span>
+            <span className={`ml-2 px-3 py-1 rounded-full text-lg font-bold border ${riskColor(aggregateWithMultiplier)}`}>{aggregateWithMultiplier}</span>
           </h1>
           {/* Tags */}
           <div className="flex flex-wrap gap-2 ml-4">
@@ -654,6 +690,23 @@ function VendorsTable({ onSelect }: { onSelect: (vendor: any) => void }) {
     publicIp: '', subdomains: '', githubOrg: '',
     complianceDoc: null, lastAuditDate: ''
   })
+  const [search, setSearch] = useState('');
+  const [criticalityFilter, setCriticalityFilter] = useState('');
+  const [sectorFilter, setSectorFilter] = useState('');
+  const [countryFilter, setCountryFilter] = useState('');
+
+  // Add mock tags to vendors if not present
+  const vendorsWithTags = vendors.map(v => ({
+    ...v,
+    tags: v.tags || (v.criticality === 'Critical' ? ['Critical', 'Watchlist'] : v.criticality === 'High' ? ['High'] : v.criticality === 'Medium' ? ['Medium'] : ['Low'])
+  }));
+
+  const filteredVendors = vendorsWithTags.filter(v =>
+    (!search || v.name.toLowerCase().includes(search.toLowerCase())) &&
+    (!criticalityFilter || v.criticality === criticalityFilter) &&
+    (!sectorFilter || v.sector === sectorFilter) &&
+    (!countryFilter || v.country === countryFilter)
+  );
 
   const steps = [
     { title: 'Basic Information', icon: <Building className="w-5 h-5" /> },
@@ -691,18 +744,52 @@ function VendorsTable({ onSelect }: { onSelect: (vendor: any) => void }) {
 
   return (
     <div className="p-0">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
           <Users className="w-6 h-6 text-blue-600" />
           <span>Vendors</span>
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Vendor</span>
-        </button>
+        <div className="flex flex-wrap gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Search vendors..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-48"
+          />
+          <select value={criticalityFilter} onChange={e => setCriticalityFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
+            <option value="">All Criticality</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <select value={sectorFilter} onChange={e => setSectorFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
+            <option value="">All Sectors</option>
+            <option value="Finance">Finance</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Pharma">Pharma</option>
+            <option value="Cloud">Cloud</option>
+            <option value="Technology">Technology</option>
+            <option value="Service Provider">Service Provider</option>
+            <option value="Infrastructure">Infrastructure</option>
+          </select>
+          <select value={countryFilter} onChange={e => setCountryFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
+            <option value="">All Countries</option>
+            <option value="USA">USA</option>
+            <option value="UK">UK</option>
+            <option value="India">India</option>
+            <option value="Australia">Australia</option>
+            <option value="Canada">Canada</option>
+          </select>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Vendor</span>
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
         <table className="min-w-full divide-y divide-gray-100">
@@ -713,10 +800,11 @@ function VendorsTable({ onSelect }: { onSelect: (vendor: any) => void }) {
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Risk Score</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sector</th>
               <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tags</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
-            {vendors.map((vendor, idx) => (
+            {filteredVendors.map((vendor, idx) => (
               <tr key={vendor.name} className="hover:bg-gray-50 cursor-pointer" onClick={() => onSelect(vendor)}>
                 <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{vendor.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -727,8 +815,18 @@ function VendorsTable({ onSelect }: { onSelect: (vendor: any) => void }) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-700">{vendor.sector}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-gray-700">{vendor.country}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex flex-wrap gap-1">
+                    {vendor.tags.map((tag: string) => (
+                      <span key={tag} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">{tag}</span>
+                    ))}
+                  </div>
+                </td>
               </tr>
             ))}
+            {filteredVendors.length === 0 && (
+              <tr><td colSpan={6} className="text-center text-gray-400 py-8">No vendors found.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -1160,51 +1258,33 @@ function VendorsTable({ onSelect }: { onSelect: (vendor: any) => void }) {
 }
 
 export default function Dashboard() {
-  const [view, setView] = useState<'dashboard' | 'vendors' | 'reports'>('dashboard')
-  const [selectedVendor, setSelectedVendor] = useState<any>(null)
+  const [view, setView] = useState<'dashboard' | 'vendors' | 'intelligence' | 'reports'>('dashboard');
+  const [selectedVendor, setSelectedVendor] = useState<any>(null);
+  const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
+  const [selectedSubItem, setSelectedSubItem] = useState<string | null>(null);
+
+  // In the Dashboard component, add state for selected intelligence subsection:
+  const [selectedIntelligence, setSelectedIntelligence] = useState<{ pillar: string, item: string } | null>(null);
+
+  // In the Dashboard view, before rendering, calculate the scores for the first vendor:
+  const dashboardVendor = vendors[0];
+  const dashboardCybersecurity = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[0].keys);
+  const dashboardCompliance = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[1].keys);
+  const dashboardGeopolitical = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[2].keys);
+  const dashboardReputation = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[3].keys);
+  const dashboardAggregate = calculateAggregateScore(dashboardVendor.scoreDetails);
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Left Navigation Bar */}
-      <div className="w-64 bg-white shadow-lg sticky top-0 h-full">
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Eye className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900">SCOPE</span>
-          </div>
-        </div>
-        {/* Navigation Items */}
-        <nav className="mt-6">
-          <div className="px-4 space-y-2">
-            <button
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition text-left ${view === 'dashboard' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'}`}
-              onClick={() => { setView('dashboard'); setSelectedVendor(null); }}
-            >
-              <BarChart3 className="w-5 h-5" />
-              <span className="font-medium">Dashboard</span>
-            </button>
-            <button
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition text-left ${view === 'vendors' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'}`}
-              onClick={() => { setView('vendors'); setSelectedVendor(null); }}
-            >
-              <Users className="w-5 h-5" />
-              <span className="font-medium">Vendors</span>
-            </button>
-            <button
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition text-left ${view === 'reports' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'}`}
-              onClick={() => { setView('reports'); setSelectedVendor(null); }}
-            >
-              <FileText className="w-5 h-5" />
-              <span className="font-medium">Reports</span>
-            </button>
-          </div>
-        </nav>
-      </div>
-
-      {/* Main Content */}
+      <Sidebar
+        view={view}
+        setView={setView}
+        selectedPillar={selectedPillar}
+        setSelectedPillar={setSelectedPillar}
+        selectedSubItem={selectedSubItem}
+        setSelectedSubItem={setSelectedSubItem}
+        setSelectedVendor={setSelectedVendor}
+      />
       <div className="flex-1 flex flex-col overflow-y-auto">
         {/* Top Bar */}
         <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
@@ -1266,16 +1346,16 @@ export default function Dashboard() {
                       <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                         <Shield className="w-6 h-6 text-blue-600" />
                       </div>
-                      <span className="text-2xl font-bold text-blue-600">40%</span>
+                      <span className="text-2xl font-bold text-blue-600">{dashboardCybersecurity}%</span>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Cybersecurity Posture</h3>
                     <p className="text-sm text-gray-600 mb-4">External attack surface, technical controls, threat readiness</p>
                   </div>
                   <div className="flex items-center space-x-2 mt-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-3">
-                      <div className="bg-blue-600 h-3 rounded-full transition-all duration-300" style={{ width: '40%' }}></div>
+                      <div className="bg-blue-600 h-3 rounded-full transition-all duration-300" style={{ width: `${dashboardCybersecurity}%` }}></div>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">72</span>
+                    <span className="text-sm font-medium text-gray-900">{dashboardCybersecurity}</span>
                   </div>
                 </div>
 
@@ -1286,16 +1366,16 @@ export default function Dashboard() {
                       <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                         <FileText className="w-6 h-6 text-green-600" />
                       </div>
-                      <span className="text-2xl font-bold text-green-600">20%</span>
+                      <span className="text-2xl font-bold text-green-600">{dashboardCompliance}%</span>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Compliance & Legal</h3>
                     <p className="text-sm text-gray-600 mb-4">Standards adherence, regulatory compliance, legal posture</p>
                   </div>
                   <div className="flex items-center space-x-2 mt-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-3">
-                      <div className="bg-green-600 h-3 rounded-full transition-all duration-300" style={{ width: '20%' }}></div>
+                      <div className="bg-green-600 h-3 rounded-full transition-all duration-300" style={{ width: `${dashboardCompliance}%` }}></div>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">85</span>
+                    <span className="text-sm font-medium text-gray-900">{dashboardCompliance}</span>
                   </div>
                 </div>
 
@@ -1306,16 +1386,16 @@ export default function Dashboard() {
                       <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                         <Globe className="w-6 h-6 text-purple-600" />
                       </div>
-                      <span className="text-2xl font-bold text-purple-600">20%</span>
+                      <span className="text-2xl font-bold text-purple-600">{dashboardGeopolitical}%</span>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Geopolitical & Sector</h3>
                     <p className="text-sm text-gray-600 mb-4">Regional stability, industry risk, infrastructure jurisdiction</p>
                   </div>
                   <div className="flex items-center space-x-2 mt-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-3">
-                      <div className="bg-purple-600 h-3 rounded-full transition-all duration-300" style={{ width: '20%' }}></div>
+                      <div className="bg-purple-600 h-3 rounded-full transition-all duration-300" style={{ width: `${dashboardGeopolitical}%` }}></div>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">68</span>
+                    <span className="text-sm font-medium text-gray-900">{dashboardGeopolitical}</span>
                   </div>
                 </div>
 
@@ -1326,16 +1406,16 @@ export default function Dashboard() {
                       <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                         <AlertTriangle className="w-6 h-6 text-red-600" />
                       </div>
-                      <span className="text-2xl font-bold text-red-600">20%</span>
+                      <span className="text-2xl font-bold text-red-600">{dashboardReputation}%</span>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Reputation & Exposure</h3>
                     <p className="text-sm text-gray-600 mb-4">Breach history, credential leaks, brand spoofing</p>
                   </div>
                   <div className="flex items-center space-x-2 mt-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-3">
-                      <div className="bg-red-600 h-3 rounded-full transition-all duration-300" style={{ width: '20%' }}></div>
+                      <div className="bg-red-600 h-3 rounded-full transition-all duration-300" style={{ width: `${dashboardReputation}%` }}></div>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">45</span>
+                    <span className="text-sm font-medium text-gray-900">{dashboardReputation}</span>
                   </div>
                 </div>
               </div>
@@ -1373,11 +1453,198 @@ export default function Dashboard() {
           )}
           {view === 'vendors' && !selectedVendor && <VendorsTable onSelect={setSelectedVendor} />}
           {view === 'vendors' && selectedVendor && <VendorDetails vendor={selectedVendor} onBack={() => setSelectedVendor(null)} />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && !selectedSubItem && <CybersecurityHome />}
+          {view === 'intelligence' && selectedPillar && selectedPillar !== 'Cybersecurity' && !selectedSubItem && <PillarHome pillar={selectedPillar} />}
+          {view === 'intelligence' && selectedPillar && selectedSubItem && !(selectedPillar === 'Cybersecurity' && selectedSubItem === 'Vulnerabilities') && <IntelligenceComingSoon pillar={selectedPillar} item={selectedSubItem} />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Vulnerabilities' && <VulnerabilitiesTable />}
           {view === 'reports' && (
-            <div className="flex items-center justify-center h-full text-gray-400 text-lg">Reports coming soon...</div>
+            <ReportsTable />
           )}
         </div>
       </div>
     </div>
   )
+}
+
+function ReportsTable() {
+  const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [vendorFilter, setVendorFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+
+  const reports = [
+    { name: 'Acme Q2 Risk', type: 'Risk', vendor: 'Acme Corp', date: '2024-06-10', status: 'Completed' },
+    { name: 'CyberSafe Compliance', type: 'Compliance', vendor: 'CyberSafe', date: '2024-06-09', status: 'In Progress' },
+    { name: 'D Pharma Geopolitical', type: 'Geopolitical', vendor: 'D Pharma', date: '2024-06-08', status: 'Completed' },
+    { name: 'DataVault Reputation', type: 'Reputation', vendor: 'DataVault', date: '2024-06-07', status: 'Completed' },
+  ];
+
+  const filteredReports = reports.filter(r =>
+    (!search || r.name.toLowerCase().includes(search.toLowerCase())) &&
+    (!typeFilter || r.type === typeFilter) &&
+    (!vendorFilter || r.vendor === vendorFilter) &&
+    (!statusFilter || r.status === statusFilter) &&
+    (!dateFilter || r.date === dateFilter)
+  );
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
+          <FileText className="w-6 h-6 text-blue-600" />
+          <span>Reports</span>
+        </h1>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Create New Report</span>
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search reports..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-48"
+        />
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
+          <option value="">All Types</option>
+          <option value="Risk">Risk</option>
+          <option value="Compliance">Compliance</option>
+          <option value="Geopolitical">Geopolitical</option>
+          <option value="Reputation">Reputation</option>
+        </select>
+        <select value={vendorFilter} onChange={e => setVendorFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
+          <option value="">All Vendors</option>
+          <option value="Acme Corp">Acme Corp</option>
+          <option value="CyberSafe">CyberSafe</option>
+          <option value="D Pharma">D Pharma</option>
+          <option value="DataVault">DataVault</option>
+        </select>
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
+          <option value="">All Statuses</option>
+          <option value="Completed">Completed</option>
+          <option value="In Progress">In Progress</option>
+        </select>
+        <input
+          type="date"
+          value={dateFilter}
+          onChange={e => setDateFilter(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg"
+        />
+      </div>
+      <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
+        <table className="min-w-full divide-y divide-gray-100">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Report Name</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vendor</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {filteredReports.map((report, idx) => (
+              <tr key={report.name} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{report.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{report.type}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{report.vendor}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{report.date}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${report.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{report.status}</span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap flex gap-2">
+                  <button className="text-blue-600 hover:underline text-sm">View</button>
+                  <button className="text-gray-600 hover:underline text-sm">Download</button>
+                  <button className="text-red-600 hover:underline text-sm">Delete</button>
+                </td>
+              </tr>
+            ))}
+            {filteredReports.length === 0 && (
+              <tr><td colSpan={6} className="text-center text-gray-400 py-8">No reports found.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {/* Create Report Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <FileText className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-bold text-gray-900">Create New Report</h2>
+              </div>
+              <button className="text-gray-400 hover:text-gray-600" onClick={() => setShowModal(false)}>
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Report Name</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Enter report name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                  <option>Risk</option>
+                  <option>Compliance</option>
+                  <option>Geopolitical</option>
+                  <option>Reputation</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Vendor</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                  <option>Acme Corp</option>
+                  <option>CyberSafe</option>
+                  <option>D Pharma</option>
+                  <option>DataVault</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 p-6 border-t border-gray-200">
+              <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => setShowModal(false)}>Cancel</button>
+              <button className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Create</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 } 
+
+function PillarHome({ pillar }: { pillar: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full py-32">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-3xl font-bold text-gray-900">{pillar} Intelligence</span>
+      </div>
+      <div className="bg-blue-50 text-blue-700 px-6 py-4 rounded-xl shadow text-lg font-semibold">Pillar Overview Coming Soon</div>
+      <div className="mt-4 text-gray-500">This page will show an overview and analytics for <span className="font-bold">{pillar}</span> intelligence.</div>
+    </div>
+  );
+}
+
+function IntelligenceComingSoon({ pillar, item }: { pillar: string, item: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full py-32">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-2xl font-bold text-gray-900">{pillar} - {item}</span>
+      </div>
+      <div className="bg-blue-50 text-blue-700 px-6 py-4 rounded-xl shadow text-lg font-semibold">Coming Soon</div>
+      <div className="mt-4 text-gray-500">This page will show detailed intelligence for <span className="font-bold">{item}</span> under <span className="font-bold">{pillar}</span>.</div>
+    </div>
+  );
+}
