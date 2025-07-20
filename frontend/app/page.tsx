@@ -17,7 +17,34 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 import Sidebar from '../components/Sidebar';
 import CybersecurityHome from '../components/intelligence/CybersecurityHome';
+import ComplianceHome from '../components/intelligence/ComplianceHome';
+import GeopoliticalHome from '../components/intelligence/GeopoliticalHome';
+import ReputationHome from '../components/intelligence/ReputationHome';
 import VulnerabilitiesTable from '../components/intelligence/VulnerabilitiesTable';
+import AttackSurfaceTable from '../components/intelligence/AttackSurfaceTable';
+import WebAppSecurityTable from '../components/intelligence/WebAppSecurityTable';
+import CloudInfraTable from '../components/intelligence/CloudInfraTable';
+import EmailSecurityTable from '../components/intelligence/EmailSecurityTable';
+import CodeRepoExposureTable from '../components/intelligence/CodeRepoExposureTable';
+import EndpointHygieneTable from '../components/intelligence/EndpointHygieneTable';
+import IOCInfraThreatTable from '../components/intelligence/IOCInfraThreatTable';
+import DetectionResponseTable from '../components/intelligence/DetectionResponseTable';
+import CertificationsTable from '../components/intelligence/CertificationsTable';
+import QuestionnaireResultsTable from '../components/intelligence/QuestionnaireResultsTable';
+import RegulatoryViolationsTable from '../components/intelligence/RegulatoryViolationsTable';
+import PrivacyComplianceTable from '../components/intelligence/PrivacyComplianceTable';
+import ContractualClausesTable from '../components/intelligence/ContractualClausesTable';
+import CountryRiskTable from '../components/intelligence/CountryRiskTable';
+import SectorRiskTable from '../components/intelligence/SectorRiskTable';
+import CompanySizeTable from '../components/intelligence/CompanySizeTable';
+import InfraJurisdictionTable from '../components/intelligence/InfraJurisdictionTable';
+import ConcentrationRiskTable from '../components/intelligence/ConcentrationRiskTable';
+import EnvironmentalExposureTable from '../components/intelligence/EnvironmentalExposureTable';
+import DataBreachHistoryTable from '../components/intelligence/DataBreachHistoryTable';
+import CredentialDataLeaksTable from '../components/intelligence/CredentialDataLeaksTable';
+import BrandSpoofingTable from '../components/intelligence/BrandSpoofingTable';
+import DarkWebPresenceTable from '../components/intelligence/DarkWebPresenceTable';
+import SocialSentimentTable from '../components/intelligence/SocialSentimentTable';
 
 const quickStats = [
   { label: 'Total Vendors', value: 42, icon: <Users className="w-5 h-5 text-blue-600" /> },
@@ -1453,10 +1480,104 @@ export default function Dashboard() {
           )}
           {view === 'vendors' && !selectedVendor && <VendorsTable onSelect={setSelectedVendor} />}
           {view === 'vendors' && selectedVendor && <VendorDetails vendor={selectedVendor} onBack={() => setSelectedVendor(null)} />}
-          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && !selectedSubItem && <CybersecurityHome />}
-          {view === 'intelligence' && selectedPillar && selectedPillar !== 'Cybersecurity' && !selectedSubItem && <PillarHome pillar={selectedPillar} />}
-          {view === 'intelligence' && selectedPillar && selectedSubItem && !(selectedPillar === 'Cybersecurity' && selectedSubItem === 'Vulnerabilities') && <IntelligenceComingSoon pillar={selectedPillar} item={selectedSubItem} />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && !selectedSubItem && (
+            <CybersecurityHome
+              avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.cybersecurity || 0), 0) / vendors.length)}
+              vendorCount={vendors.length}
+              highRiskCount={vendors.filter(v => (v.scores?.cybersecurity || 0) < 50).length}
+              patchCompliance={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.cybersecurity || 0), 0) / vendors.length)}
+              subcategoryScores={pillarGroups[0].keys.map(key => ({
+                name: key,
+                avg: Math.round(vendors.reduce((sum, v) => {
+                  const item = v.scoreDetails.find(i => i.category === key);
+                  return sum + (item ? item.score : 0);
+                }, 0) / vendors.length)
+              }))}
+            />
+          )}
           {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Vulnerabilities' && <VulnerabilitiesTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Attack Surface' && <AttackSurfaceTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Web/App Security' && <WebAppSecurityTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Cloud & Infra' && <CloudInfraTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Email Security' && <EmailSecurityTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Code Repo Exposure' && <CodeRepoExposureTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Endpoint Hygiene' && <EndpointHygieneTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'IOC & Infra Threat' && <IOCInfraThreatTable />}
+          {view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Detection & Response' && <DetectionResponseTable />}
+          {view === 'intelligence' && selectedPillar === 'Compliance' && !selectedSubItem && (
+            <ComplianceHome
+              avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.compliance || 0), 0) / vendors.length)}
+              vendorCount={vendors.length}
+              highRiskCount={vendors.filter(v => (v.scores?.compliance || 0) < 50).length}
+              subcategoryScores={pillarGroups[1].keys.map(key => ({
+                name: key,
+                avg: Math.round(vendors.reduce((sum, v) => {
+                  const item = v.scoreDetails.find(i => i.category === key);
+                  return sum + (item ? item.score : 0);
+                }, 0) / vendors.length)
+              }))}
+            />
+          )}
+          {view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Certifications' && <CertificationsTable />}
+          {view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Questionnaire Results' && <QuestionnaireResultsTable />}
+          {view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Regulatory Violations' && <RegulatoryViolationsTable />}
+          {view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Privacy Compliance' && <PrivacyComplianceTable />}
+          {view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Contractual Clauses' && <ContractualClausesTable />}
+          {view === 'intelligence' && selectedPillar === 'Geopolitical' && !selectedSubItem && (
+            <GeopoliticalHome
+              avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.geopolitical || 0), 0) / vendors.length)}
+              vendorCount={vendors.length}
+              highRiskCount={vendors.filter(v => (v.scores?.geopolitical || 0) < 50).length}
+              subcategoryScores={pillarGroups[2].keys.map(key => ({
+                name: key,
+                avg: Math.round(vendors.reduce((sum, v) => {
+                  const item = v.scoreDetails.find(i => i.category === key);
+                  return sum + (item ? item.score : 0);
+                }, 0) / vendors.length)
+              }))}
+            />
+          )}
+          {view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Country Risk' && <CountryRiskTable />}
+          {view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Sector Risk' && <SectorRiskTable />}
+          {view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Company Size' && <CompanySizeTable />}
+          {view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Infra Jurisdiction' && <InfraJurisdictionTable />}
+          {view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Concentration Risk' && <ConcentrationRiskTable />}
+          {view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Environmental Exposure' && <EnvironmentalExposureTable />}
+          {view === 'intelligence' && selectedPillar === 'Reputation' && !selectedSubItem && (
+            <ReputationHome
+              avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.reputation || 0), 0) / vendors.length)}
+              vendorCount={vendors.length}
+              highRiskCount={vendors.filter(v => (v.scores?.reputation || 0) < 50).length}
+              subcategoryScores={pillarGroups[3].keys.map(key => ({
+                name: key,
+                avg: Math.round(vendors.reduce((sum, v) => {
+                  const item = v.scoreDetails.find(i => i.category === key);
+                  return sum + (item ? item.score : 0);
+                }, 0) / vendors.length)
+              }))}
+            />
+          )}
+          {view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Data Breach History' && <DataBreachHistoryTable />}
+          {view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Credential/Data Leaks' && <CredentialDataLeaksTable />}
+          {view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Brand Spoofing' && <BrandSpoofingTable />}
+          {view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Dark Web Presence' && <DarkWebPresenceTable />}
+          {view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Social Sentiment' && <SocialSentimentTable />}
+          {/* Only show Coming Soon for truly unimplemented sub-items (should be none now) */}
+          {view === 'intelligence' && selectedPillar && selectedSubItem &&
+            !(
+              (selectedPillar === 'Cybersecurity' && [
+                'Vulnerabilities','Attack Surface','Web/App Security','Cloud & Infra','Email Security','Code Repo Exposure','Endpoint Hygiene','IOC & Infra Threat','Detection & Response'
+              ].includes(selectedSubItem)) ||
+              (selectedPillar === 'Compliance' && [
+                'Certifications','Questionnaire Results','Regulatory Violations','Privacy Compliance','Contractual Clauses'
+              ].includes(selectedSubItem)) ||
+              (selectedPillar === 'Geopolitical' && [
+                'Country Risk','Sector Risk','Company Size','Infra Jurisdiction','Concentration Risk','Environmental Exposure'
+              ].includes(selectedSubItem)) ||
+              (selectedPillar === 'Reputation' && [
+                'Data Breach History','Credential/Data Leaks','Brand Spoofing','Dark Web Presence','Social Sentiment'
+              ].includes(selectedSubItem))
+            ) && <IntelligenceComingSoon pillar={selectedPillar} item={selectedSubItem} />}
           {view === 'reports' && (
             <ReportsTable />
           )}
@@ -1624,18 +1745,6 @@ function ReportsTable() {
     </div>
   );
 } 
-
-function PillarHome({ pillar }: { pillar: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-full py-32">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-3xl font-bold text-gray-900">{pillar} Intelligence</span>
-      </div>
-      <div className="bg-blue-50 text-blue-700 px-6 py-4 rounded-xl shadow text-lg font-semibold">Pillar Overview Coming Soon</div>
-      <div className="mt-4 text-gray-500">This page will show an overview and analytics for <span className="font-bold">{pillar}</span> intelligence.</div>
-    </div>
-  );
-}
 
 function IntelligenceComingSoon({ pillar, item }: { pillar: string, item: string }) {
   return (
