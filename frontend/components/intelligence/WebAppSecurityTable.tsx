@@ -28,8 +28,8 @@ const columns: ColumnDef<AppSecurityIssue>[] = [
   {
     accessorKey: 'severity',
     header: 'Severity',
-    cell: ({ row }) => {
-      const severity = row.original.severity;
+    cell: (row) => {
+      const severity = row.severity;
       const color =
         severity === 'High' ? 'text-red-700' :
         severity === 'Medium' ? 'text-orange-700' :
