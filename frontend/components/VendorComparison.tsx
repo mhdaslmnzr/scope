@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { vendors, criticalityColors, scoreColors } from '../mock-data';
 
 interface VendorComparisonProps {
-  selectedVendorIds: string[];
+  selectedVendorIds: string[;
   onBack: () => void;
 }
 
@@ -15,7 +15,7 @@ export default function VendorComparison({ selectedVendorIds, onBack }: VendorCo
   const renderScore = (score: number) => (
     <div className="flex items-center space-x-2">
       <div className="w-full bg-gray-200 rounded-full h-4">
-        <div className={`h-4 rounded-full ${scoreColors(score).split(' ')[0]}`} style={{ width: `${score}%` }}></div>
+        <div className={`h-4 rounded-full ${scoreColors(score).split(' ')[0}`} style={{ width: `${score}%` }}></div>
       </div>
       <span className="font-bold w-12 text-center">{score}</span>
     </div>
@@ -27,7 +27,7 @@ export default function VendorComparison({ selectedVendorIds, onBack }: VendorCo
     { label: 'Country', key: 'country' },
     { label: 'Employee Count', key: 'employeeCount' },
     { label: 'Certifications', key: 'certifications' },
-  ];
+  ;
 
   const scoreCategories = [
     { label: 'Aggregate Score', key: 'score' },
@@ -60,7 +60,7 @@ export default function VendorComparison({ selectedVendorIds, onBack }: VendorCo
                 {selectedVendors.map(vendor => (
                   <td key={vendor.name} className="px-6 py-4 text-gray-800">
                      {attr.key === 'criticality' ? 
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${criticalityColors[vendor[attr.key]]}`}>{vendor[attr.key]}</span> : 
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${criticalityColors[vendor[attr.key]}`}>{vendor[attr.key}</span> :
                       (vendor as any)[attr.key]
                     }
                   </td>
@@ -72,7 +72,7 @@ export default function VendorComparison({ selectedVendorIds, onBack }: VendorCo
                 <td className="px-6 py-4 font-semibold text-gray-600">{cat.label}</td>
                 {selectedVendors.map(vendor => (
                   <td key={vendor.name} className="px-6 py-4">
-                    {renderScore(cat.scoreKey ? vendor.scores[cat.key] : vendor[cat.key])}
+                    {renderScore(cat.scoreKey ? vendor.scores[cat.key as keyof typeof vendor.scores : (vendor as any)[cat.key])}
                   </td>
                 ))}
               </tr>
