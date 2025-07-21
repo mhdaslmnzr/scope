@@ -51,6 +51,17 @@ export default function IntelligenceSidebar({
   onSelectPillar: (pillar: string) => void;
   onSelectSubItem: (pillar: string, item: string) => void;
 }) {
+  const [activePillar, setActivePillar] = useState<string | null>(selectedPillar);
+
+  const handlePillarClick = (pillarName: string) => {
+    if (activePillar === pillarName) {
+      setActivePillar(null); // Collapse if clicking the active pillar
+    } else {
+      setActivePillar(pillarName);
+    }
+    onSelectPillar(pillarName);
+  };
+
   return (
     <div className="mt-2">
       <button
@@ -67,13 +78,13 @@ export default function IntelligenceSidebar({
             <div key={pillar.name}>
               <button
                 className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg transition text-left font-medium text-${pillar.color}-700 hover:bg-${pillar.color}-50 ${selectedPillar === pillar.name && !selectedSubItem ? 'bg-' + pillar.color + '-100 font-bold' : ''}`}
-                onClick={() => onSelectPillar(pillar.name)}
+                onClick={() => handlePillarClick(pillar.name)}
               >
                 {pillar.icon}
                 <span>{pillar.name}</span>
-                {selectedPillar === pillar.name ? <ChevronDown className="w-4 h-4 ml-auto" /> : <ChevronRight className="w-4 h-4 ml-auto" />}
+                {activePillar === pillar.name ? <ChevronDown className="w-4 h-4 ml-auto" /> : <ChevronRight className="w-4 h-4 ml-auto" />}
               </button>
-              {selectedPillar === pillar.name && (
+              {activePillar === pillar.name && (
                 <div className="ml-6 mt-1 space-y-1">
                   {pillar.items.map(item => (
                     <button

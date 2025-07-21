@@ -12,7 +12,7 @@ export default function Sidebar({
   setSelectedVendor,
 }: {
   view: string;
-  setView: (v: string) => void;
+  setView: (v: 'dashboard' | 'vendors' | 'intelligence' | 'reports') => void;
   selectedPillar: string | null;
   setSelectedPillar: (p: string | null) => void;
   selectedSubItem: string | null;
