@@ -32,6 +32,7 @@ export const vendors = [
     ],
     breachChance: 0.72,
     questionnaires: { nist: true, sig: false, openfair: true },
+    tags: ['Finance', 'Data Processor'],
   },
   // ... other vendors
 ];
