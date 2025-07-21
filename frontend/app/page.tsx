@@ -544,8 +544,9 @@ export default function Dashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
+                {/* Cybersecurity Card */}
                 <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer" onClick={() => { setView('intelligence'); setSelectedPillar('Cybersecurity'); setSelectedSubItem(null); }}>
-                  <Card className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1">
+                  <Card className="flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <div className="w-12 h-12 bg-primary-foreground rounded-lg flex items-center justify-center"><Shield className="w-6 h-6 text-primary" /></div>
@@ -557,32 +558,38 @@ export default function Dashboard() {
                     <Sparkline data={sparklineData} color="hsl(var(--primary))" />
                   </Card>
                 </div>
-                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer" onClick={() => { setView('intelligence'); setSelectedPillar('Compliance'); setSelectedSubItem(null); }}>
-                   <div>
+
+                {/* Compliance Pillar */}
+                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer p-6 bg-white rounded-xl shadow-sm border" onClick={() => { setView('intelligence'); setSelectedPillar('Compliance'); setSelectedSubItem(null); }}>
+                  <div>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-success-foreground rounded-lg flex items-center justify-center"><FileText className="w-6 h-6 text-success" /></div>
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center"><FileText className="w-6 h-6 text-success" /></div>
                       <span className="text-2xl font-bold text-success">{dashboardCompliance}%</span>
                     </div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">Compliance & Legal</h3>
                     <p className="text-sm text-muted-foreground mb-4">Standards adherence, regulatory compliance, legal posture</p>
                   </div>
-                   <Sparkline data={sparklineData} color="hsl(var(--success))" />
+                  <Sparkline data={sparklineData} color="hsl(var(--success))" />
                 </div>
-                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer" onClick={() => { setView('intelligence'); setSelectedPillar('Geopolitical'); setSelectedSubItem(null); }}>
-                   <div>
+
+                {/* Geopolitical Pillar */}
+                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer p-6 bg-white rounded-xl shadow-sm border" onClick={() => { setView('intelligence'); setSelectedPillar('Geopolitical'); setSelectedSubItem(null); }}>
+                  <div>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-info-foreground rounded-lg flex items-center justify-center"><Globe className="w-6 h-6 text-info" /></div>
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center"><Globe className="w-6 h-6 text-info" /></div>
                       <span className="text-2xl font-bold text-info">{dashboardGeopolitical}%</span>
                     </div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">Geopolitical & Sector</h3>
                     <p className="text-sm text-muted-foreground mb-4">Regional stability, industry risk, infrastructure jurisdiction</p>
                   </div>
-                   <Sparkline data={sparklineData} color="hsl(var(--info))" />
+                  <Sparkline data={sparklineData} color="hsl(var(--info))" />
                 </div>
-                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer" onClick={() => { setView('intelligence'); setSelectedPillar('Reputation'); setSelectedSubItem(null); }}>
-                   <div>
+
+                {/* Reputation Pillar */}
+                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer p-6 bg-white rounded-xl shadow-sm border" onClick={() => { setView('intelligence'); setSelectedPillar('Reputation'); setSelectedSubItem(null); }}>
+                  <div>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-destructive-foreground rounded-lg flex items-center justify-center"><AlertTriangle className="w-6 h-6 text-destructive" /></div>
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center"><AlertTriangle className="w-6 h-6 text-destructive" /></div>
                       <span className="text-2xl font-bold text-destructive">{dashboardReputation}%</span>
                     </div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">Reputation & Exposure</h3>
