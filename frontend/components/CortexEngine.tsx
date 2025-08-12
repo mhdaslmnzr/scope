@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   Brain, Calculator, BarChart3, TrendingUp, Shield, FileText, Globe, AlertTriangle,
   Sliders, Play, RotateCcw, Download, Copy, Zap, Activity, Target, Settings
@@ -251,12 +252,18 @@ export default function CortexEngine() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <Brain className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-center">
+          <Image 
+              src="/images/cortex.png" 
+              alt="SCOPE Logo" 
+              width={100} 
+              height={100}
+              className="object-contain"
+            />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Cortex Scoring Engine</h1>
-            <p className="text-gray-600">Advanced risk calculation and simulation platform</p>
+            <h1 className="text-2xl font-bold text-gray-900">CORTEX</h1>
+            <p className="text-gray-600">Contextual Risk, Threat & Exposure risk calculation engine</p>
           </div>
         </div>
         <div className="flex items-center gap-3">

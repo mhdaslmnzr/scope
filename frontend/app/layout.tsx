@@ -5,8 +5,11 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'SCOPE - Supply Chain OSINT & Prediction Engine',
-  description: 'Cybersecurity-focused Third Party Risk Management platform',
+  title: 'SCOPE',
+  description: 'Supply Chain OSINT & Prediction Engine',
+  icons: {
+    icon: '/images/logo.png', // or '/favicon.ico'
+  },
 }
 
 export default function RootLayout({

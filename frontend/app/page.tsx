@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from "next/image";
+
 import { 
   Shield, 
   FileText, 
@@ -177,19 +179,17 @@ const pillarGroups = [
                 setSelectedSubItem(null);
                 setUseNewDetailsView(false);
               }}
-              className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200"
+              className="flex items-center space-x-3"
             >
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex flex-col items-start">
-                <span className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  SCOPE
-                </span>
-                <span className="text-xs text-gray-500 font-medium">
-                  Supply Chain OSINT & Prediction Engine
-              </span>
-              </div>
+              <div className="flex items-center justify-center">
+              <Image 
+                src="/images/logo.png" 
+                alt="SCOPE Logo" 
+                width={200} 
+                height={40}
+                className="object-contain"
+              />
+            </div>
             </button>
 
             {/* Center: Enhanced Search Bar with Live Results - More Compact */}
@@ -301,7 +301,7 @@ const pillarGroups = [
       {/* Main Layout: Sidebar + Content */}
       <div className="flex">
         {/* Sidebar - Sticky positioned below header */}
-        <div className="w-56 bg-white shadow-lg border-r border-gray-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className="w-64 bg-white shadow-lg border-r border-gray-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
       <Sidebar
         view={view}
         setView={setView}
