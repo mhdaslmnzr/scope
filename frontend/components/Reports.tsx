@@ -337,7 +337,7 @@ export default function Reports() {
       pdf.text('Last Scan: ' + (vendor.lastScan ?? 'N/A'), margin + 80, pageHeight - footerHeight + 8);
   
       // ==== Page numbers & final footer on EVERY page ====
-      const pageCount = pdf.internal.getNumberOfPages();
+      const pageCount = (pdf.internal as any).getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
         pdf.setDrawColor(220);
