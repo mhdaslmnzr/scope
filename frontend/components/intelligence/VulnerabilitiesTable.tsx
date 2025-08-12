@@ -83,7 +83,7 @@ export default function VulnerabilitiesTable() {
       <div className="flex items-center gap-3 mb-6">
         <span className="text-2xl font-bold text-blue-700">Vulnerabilities</span>
       </div>
-      <DataTable data={MOCK_VULNS} columns={columns} filterKeys={['cve', 'vendor']} />
+      <DataTable data={VULNERABILITIES} columns={columns} filterKeys={['cve', 'vendor']} />
     </div>
   );
 } 
