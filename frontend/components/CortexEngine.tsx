@@ -419,7 +419,7 @@ export default function CortexEngine() {
                 <div className="mt-2 text-gray-400">// Weighted average of components</div>
                 <div className="mt-4">where:</div>
                 <div>• componentScore ∈ [0, 100]</div>
-                <div>• weight ∈ [0.1, 1.0]</div>
+                <div>• weight ∈ [2.0, 4.0]</div>
               </div>
             </Card>
 
@@ -491,7 +491,7 @@ export default function CortexEngine() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
                 <div>
                   <p className="font-medium text-gray-800 mb-1">1. Component Level</p>
-                  <p>Each category gets a score (0-100) and relative weight (2-6)</p>
+                  <p>Each category gets a score (0-100) and relative weight (2-4)</p>
                 </div>
                 <div>
                   <p className="font-medium text-gray-800 mb-1">2. Pillar Level</p>
