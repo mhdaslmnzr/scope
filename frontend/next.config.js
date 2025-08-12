@@ -7,8 +7,7 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   devIndicators: {
-    buildActivity: false,
-    buildActivityPosition: 'bottom-right',
+    position: 'bottom-right',
   },
 };
 
