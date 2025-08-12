@@ -222,7 +222,7 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
                       <tr className="border-b border-gray-200">
                         <th className="text-left py-2 px-2 text-gray-600">Category</th>
                         <th className="text-left py-2 px-2 text-gray-600">Score</th>
-                        <th className="text-left py-2 px-2 text-gray-600">Weight</th>
+                        {/* <th className="text-left py-2 px-2 text-gray-600">Weight</th> */}
                       </tr>
                     </thead>
                     <tbody>
@@ -239,7 +239,7 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
                               <span className="font-bold w-12 text-center">{item.score}</span>
                             </div>
                           </td>
-                          <td className="py-2 px-2">{item.weight}%</td>
+                          {/* <td className="py-2 px-2">{item.weight}%</td> */}
                         </tr>
                       ))}
                     </tbody>
