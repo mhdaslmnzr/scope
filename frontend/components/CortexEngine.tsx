@@ -34,35 +34,35 @@ ChartJS.register(
   ArcElement
 );
 
-// Mock pillar groups for calculations
+// Updated pillar groups to match the 25-category breakdown with proper category mapping
 const pillarGroups = [
   { 
     name: 'Cybersecurity', 
     weight: 0.35,
-    keys: ['attack_surface', 'vulnerabilities', 'endpoint_hygiene', 'email_security', 'web_app_security', 'detection_response'],
+    categories: ['Vulnerability Management', 'Attack Surface', 'Web/App Security', 'Cloud & Infra', 'Email Security', 'Code Repo Exposure', 'Endpoint Hygiene', 'IOC & Infra Threat', 'Detection & Response'],
     color: '#3B82F6',
-    description: 'External attack surface, vulnerability management, endpoint protection'
+    description: 'External attack surface, vulnerability management, endpoint protection, cloud infrastructure, code security (9 categories)'
   },
   { 
     name: 'Compliance', 
     weight: 0.25,
-    keys: ['certifications', 'privacy_compliance', 'contractual_clauses'],
+    categories: ['Certifications', 'Questionnaire Quality', 'Regulatory Violations', 'Privacy Compliance', 'Contractual Clauses'],
     color: '#10B981',
-    description: 'Regulatory compliance, certifications, contractual obligations'
+    description: 'Regulatory compliance, certifications, questionnaire responses, contractual obligations (5 categories)'
   },
   { 
     name: 'Geopolitical', 
     weight: 0.20,
-    keys: ['country_risk', 'sector_risk', 'infra_jurisdiction'],
+    categories: ['Country Risk', 'Sector Risk', 'Company Size', 'Infra Jurisdiction', 'Concentration Risk', 'Environmental Exposure'],
     color: '#8B5CF6',
-    description: 'Geographic and political risk factors'
+    description: 'Geographic and political risk factors, company characteristics, infrastructure location (6 categories)'
   },
   { 
     name: 'Reputation', 
     weight: 0.20,
-    keys: ['data_breach_history', 'dark_web_presence', 'social_sentiment', 'credential_leaks'],
+    categories: ['Data Breach History', 'Credential/Data Leaks', 'Brand Spoofing', 'Dark Web Presence', 'Social Sentiment'],
     color: '#EF4444',
-    description: 'Historical breaches, public sentiment, data leaks'
+    description: 'Historical breaches, public sentiment, data leaks, brand protection, dark web monitoring (5 categories)'
   }
 ];
 
@@ -71,33 +71,39 @@ export default function CortexEngine() {
   const [activeTab, setActiveTab] = useState('overview');
   const [simulatorMode, setSimulatorMode] = useState(false);
   
-  // Independent simulator state - not tied to vendors
+  // Independent simulator state - not tied to vendors (all 25 categories)
   const [simulatedCriticality, setSimulatedCriticality] = useState('Medium');
   const [simulatedScores, setSimulatedScores] = useState([
-    // Cybersecurity Components
+    // Cybersecurity Components (9 categories)
     { category: 'Vulnerability Management', score: 75, weight: 5, pillar: 'Cybersecurity' },
     { category: 'Attack Surface', score: 65, weight: 5, pillar: 'Cybersecurity' },
     { category: 'Web/App Security', score: 80, weight: 5, pillar: 'Cybersecurity' },
     { category: 'Cloud & Infra', score: 70, weight: 5, pillar: 'Cybersecurity' },
     { category: 'Email Security', score: 85, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'Code Repo Exposure', score: 60, weight: 5, pillar: 'Cybersecurity' },
     { category: 'Endpoint Hygiene', score: 60, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'IOC & Infra Threat', score: 70, weight: 3, pillar: 'Cybersecurity' },
     { category: 'Detection & Response', score: 70, weight: 2, pillar: 'Cybersecurity' },
     
-    // Compliance Components
+    // Compliance Components (5 categories)
     { category: 'Certifications', score: 90, weight: 6, pillar: 'Compliance' },
+    { category: 'Questionnaire Quality', score: 85, weight: 5, pillar: 'Compliance' },
+    { category: 'Regulatory Violations', score: 95, weight: 5, pillar: 'Compliance' },
     { category: 'Privacy Compliance', score: 85, weight: 2, pillar: 'Compliance' },
     { category: 'Contractual Clauses', score: 75, weight: 2, pillar: 'Compliance' },
-    { category: 'Regulatory Violations', score: 95, weight: 5, pillar: 'Compliance' },
     
-    // Geopolitical Components
+    // Geopolitical Components (6 categories)
     { category: 'Country Risk', score: 80, weight: 6, pillar: 'Geopolitical' },
     { category: 'Sector Risk', score: 70, weight: 4, pillar: 'Geopolitical' },
+    { category: 'Company Size', score: 75, weight: 3, pillar: 'Geopolitical' },
     { category: 'Infra Jurisdiction', score: 85, weight: 3, pillar: 'Geopolitical' },
     { category: 'Concentration Risk', score: 60, weight: 2, pillar: 'Geopolitical' },
+    { category: 'Environmental Exposure', score: 70, weight: 2, pillar: 'Geopolitical' },
     
-    // Reputation Components
+    // Reputation Components (5 categories)
     { category: 'Data Breach History', score: 90, weight: 6, pillar: 'Reputation' },
     { category: 'Credential/Data Leaks', score: 85, weight: 5, pillar: 'Reputation' },
+    { category: 'Brand Spoofing', score: 80, weight: 3, pillar: 'Reputation' },
     { category: 'Dark Web Presence', score: 95, weight: 3, pillar: 'Reputation' },
     { category: 'Social Sentiment', score: 80, weight: 3, pillar: 'Reputation' },
   ]);
@@ -152,33 +158,39 @@ export default function CortexEngine() {
   const currentAggregateScore = calculateAggregateScore(currentPillarScores, simulatedCriticality);
   const currentBreachProbability = calculateBreachProbability(currentAggregateScore, simulatedCriticality);
 
-  // Reset simulator to default values
+  // Reset simulator to default values (all 25 categories)
   const resetSimulator = () => {
     setSimulatedScores([
-      // Cybersecurity Components
+      // Cybersecurity Components (9 categories)
       { category: 'Vulnerability Management', score: 75, weight: 5, pillar: 'Cybersecurity' },
       { category: 'Attack Surface', score: 65, weight: 5, pillar: 'Cybersecurity' },
       { category: 'Web/App Security', score: 80, weight: 5, pillar: 'Cybersecurity' },
       { category: 'Cloud & Infra', score: 70, weight: 5, pillar: 'Cybersecurity' },
       { category: 'Email Security', score: 85, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'Code Repo Exposure', score: 60, weight: 5, pillar: 'Cybersecurity' },
       { category: 'Endpoint Hygiene', score: 60, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'IOC & Infra Threat', score: 70, weight: 3, pillar: 'Cybersecurity' },
       { category: 'Detection & Response', score: 70, weight: 2, pillar: 'Cybersecurity' },
       
-      // Compliance Components
+      // Compliance Components (5 categories)
       { category: 'Certifications', score: 90, weight: 6, pillar: 'Compliance' },
+      { category: 'Questionnaire Quality', score: 85, weight: 5, pillar: 'Compliance' },
+      { category: 'Regulatory Violations', score: 95, weight: 5, pillar: 'Compliance' },
       { category: 'Privacy Compliance', score: 85, weight: 2, pillar: 'Compliance' },
       { category: 'Contractual Clauses', score: 75, weight: 2, pillar: 'Compliance' },
-      { category: 'Regulatory Violations', score: 95, weight: 5, pillar: 'Compliance' },
       
-      // Geopolitical Components
+      // Geopolitical Components (6 categories)
       { category: 'Country Risk', score: 80, weight: 6, pillar: 'Geopolitical' },
       { category: 'Sector Risk', score: 70, weight: 4, pillar: 'Geopolitical' },
+      { category: 'Company Size', score: 75, weight: 3, pillar: 'Geopolitical' },
       { category: 'Infra Jurisdiction', score: 85, weight: 3, pillar: 'Geopolitical' },
       { category: 'Concentration Risk', score: 60, weight: 2, pillar: 'Geopolitical' },
+      { category: 'Environmental Exposure', score: 70, weight: 2, pillar: 'Geopolitical' },
       
-      // Reputation Components
+      // Reputation Components (5 categories)
       { category: 'Data Breach History', score: 90, weight: 6, pillar: 'Reputation' },
       { category: 'Credential/Data Leaks', score: 85, weight: 5, pillar: 'Reputation' },
+      { category: 'Brand Spoofing', score: 80, weight: 3, pillar: 'Reputation' },
       { category: 'Dark Web Presence', score: 95, weight: 3, pillar: 'Reputation' },
       { category: 'Social Sentiment', score: 80, weight: 3, pillar: 'Reputation' },
     ]);
@@ -263,10 +275,10 @@ export default function CortexEngine() {
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8">
           {[
-            { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-4 h-4" /> },
-            { id: 'algorithm', label: 'Algorithm', icon: <Calculator className="w-4 h-4" /> },
+            { id: 'overview', label: 'Overview(mock)', icon: <BarChart3 className="w-4 h-4" /> },
+            { id: 'algorithm', label: 'Algorithm(mvp)', icon: <Calculator className="w-4 h-4" /> },
             { id: 'simulator', label: 'Score Simulator', icon: <Sliders className="w-4 h-4" /> },
-            { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-4 h-4" /> }
+            { id: 'analytics', label: 'Analytics(mock)', icon: <TrendingUp className="w-4 h-4" /> }
           ].map(tab => (
             <button
               key={tab.id}
@@ -304,12 +316,13 @@ export default function CortexEngine() {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Score Components</span>
-                <span className="font-semibold">{simulatedScores.length}</span>
+                <span className="font-semibold">25</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Avg Processing Time</span>
-                <span className="font-semibold text-green-600">330ms</span>
+                <span className="text-gray-600">Total Component Weight</span>
+                <span className="font-semibold">{simulatedScores.reduce((sum, item) => sum + item.weight, 0)}</span>
               </div>
+    
               <div className="flex justify-between">
                 <span className="text-gray-600">Engine Version</span>
                 <span className="font-semibold">v2.1.0</span>
@@ -472,6 +485,25 @@ export default function CortexEngine() {
               </div>
             </div>
 
+            {/* Scoring Process Explanation */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+              <h5 className="font-medium text-gray-900 mb-3">How Scores Are Calculated</h5>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+                <div>
+                  <p className="font-medium text-gray-800 mb-1">1. Component Level</p>
+                  <p>Each category gets a score (0-100) and relative weight (2-6)</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 mb-1">2. Pillar Level</p>
+                  <p>Weighted average of components within each pillar</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 mb-1">3. Final Score</p>
+                  <p>Pillar scores weighted by pillar importance, then adjusted by criticality</p>
+                </div>
+              </div>
+            </div>
+
             {/* Current Results */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-blue-50 p-4 rounded-lg text-center">
@@ -484,7 +516,7 @@ export default function CortexEngine() {
               </div>
               <div className="bg-purple-50 p-4 rounded-lg text-center">
                 <div className="text-lg font-bold text-purple-600">{simulatedCriticality}</div>
-                <div className="text-sm text-purple-800">Criticality Level</div>
+                <div className="text-sm text-purple-800">Asset Criticality Level</div>
               </div>
               <div className="bg-green-50 p-4 rounded-lg text-center">
                 <div className="text-lg font-bold text-green-600">{riskColor(currentAggregateScore).includes('green') ? 'Low' : riskColor(currentAggregateScore).includes('yellow') ? 'Medium' : riskColor(currentAggregateScore).includes('red') ? 'High' : 'Critical'}</div>
@@ -494,7 +526,13 @@ export default function CortexEngine() {
 
             {/* Criticality Selector */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Criticality Level</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Asset Criticality Level</label>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Criticality Multiplier:</strong> Critical assets get a 0.9x multiplier (10% score reduction), 
+                  High assets get 0.95x (5% reduction), Medium/Low assets get 1.0x (no change)
+                </p>
+              </div>
               <select
                 value={simulatedCriticality}
                 onChange={(e) => setSimulatedCriticality(e.target.value)}
@@ -511,6 +549,16 @@ export default function CortexEngine() {
             <div className="space-y-6">
               <h4 className="font-semibold text-gray-900">Component Scores by Risk Pillar</h4>
               
+              {/* Weight System Explanation */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h5 className="font-medium text-blue-900 mb-2">Weight System Explanation</h5>
+                <div className="text-sm text-blue-800 space-y-1">
+                  <p><strong>Component Weights:</strong> Individual category weights (2-6) represent relative importance within each pillar</p>
+                  <p><strong>Pillar Weights:</strong> Cybersecurity (35%), Compliance (25%), Geopolitical (20%), Reputation (20%)</p>
+                  <p><strong>Final Score:</strong> Weighted average of all components, then adjusted by criticality level</p>
+                </div>
+              </div>
+              
               {pillarGroups.map((pillar) => (
                 <div key={pillar.name} className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -520,6 +568,9 @@ export default function CortexEngine() {
                     {pillar.name === 'Reputation' && <AlertTriangle className="w-4 h-4 text-red-600" />}
                     <h5 className="font-medium text-gray-800">{pillar.name}</h5>
                     <span className="text-xs text-gray-500">({pillar.description})</span>
+                    <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                      Weight: {(pillar.weight * 100)}%
+                    </span>
                   </div>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 pl-6">
@@ -541,7 +592,7 @@ export default function CortexEngine() {
                           />
                           <div className="flex justify-between text-xs text-gray-500 mt-1">
                             <span>0</span>
-                            <span>Weight: {item.weight}</span>
+                            <span className="font-medium">Weight: {item.weight} (Relative)</span>
                             <span>100</span>
                           </div>
                         </div>
@@ -555,6 +606,26 @@ export default function CortexEngine() {
           {/* Pillar Breakdown */}
           <Card>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Pillar Breakdown</h3>
+            
+            {/* Weight Summary */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <h6 className="font-medium text-blue-900 mb-2">Total Weights by Pillar</h6>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                {pillarGroups.map((pillar) => {
+                  const totalComponentWeight = simulatedScores
+                    .filter(item => item.pillar === pillar.name)
+                    .reduce((sum, item) => sum + item.weight, 0);
+                  return (
+                    <div key={pillar.name} className="text-center">
+                      <div className="font-medium text-blue-800">{pillar.name}</div>
+                      <div className="text-blue-600">Component: {totalComponentWeight}</div>
+                      <div className="text-blue-600">Pillar: {(pillar.weight * 100)}%</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {currentPillarScores.map((pillar) => (
                 <div key={pillar.name} className="bg-gray-50 p-4 rounded-lg">
@@ -580,6 +651,34 @@ export default function CortexEngine() {
                   </div>
                 </div>
               ))}
+            </div>
+          </Card>
+
+          {/* Score Calculation Summary */}
+          <Card>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Score Calculation Summary</h3>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h6 className="font-medium text-gray-800 mb-2">Current Pillar Scores</h6>
+                  <div className="space-y-2 text-sm">
+                    {currentPillarScores.map((pillar) => (
+                      <div key={pillar.name} className="flex justify-between">
+                        <span className="text-gray-600">{pillar.name}:</span>
+                        <span className="font-medium">{pillar.score}/100</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h6 className="font-medium text-gray-800 mb-2">Final Calculation</h6>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <p>Base Score: {Math.round(currentPillarScores.reduce((sum, pillar) => sum + (pillar.score * pillar.weight), 0))}</p>
+                    <p>Criticality: {simulatedCriticality} (×{simulatedCriticality === 'Critical' ? '0.9' : simulatedCriticality === 'High' ? '0.95' : '1.0'})</p>
+                    <p className="font-medium text-gray-800">Final Score: {currentAggregateScore}/100</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </Card>
         </div>

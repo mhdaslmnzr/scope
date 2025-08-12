@@ -180,7 +180,7 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
                       <div className="flex items-center gap-2 mb-1">{pillar.icon}<span className={`font-semibold text-${pillar.color}-700`}>{pillar.name}</span></div>
                       <p className="text-xs text-gray-500 mt-1">{pillar.desc}</p>
                     </div>
-                    <span className={`text-2xl font-bold text-${pillar.color}-600`}>{pillar.score}%</span>
+                    <span className={`text-2xl font-bold text-${pillar.color}-600`}>{pillar.score}</span>
                   </div>
                   <div className="mt-4">
                     <div className="h-16 bg-gradient-to-r from-blue-50 to-blue-100 rounded flex items-center justify-center relative overflow-hidden">
@@ -208,104 +208,151 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
             {/* Score Breakdown Table with Simulator */}
             {!loading && (<Card>
               <h2 className="text-lg font-semibold text-gray-800 mb-4">Risk Breakdown</h2>
-                              <div className="h-auto bg-gradient-to-br from-gray-50 to-gray-100 rounded p-3">
-                  <div className="grid grid-cols-8 grid-rows-4 gap-1 h-full min-h-[180px]">
-                  {vendorData.scoreDetails.map((item: any, index: number) => {
-                    // Risk-based colors
-                    const getRiskColor = (score: number) => {
-                      if (score >= 80) return 'bg-green-500';
-                      if (score >= 60) return 'bg-yellow-500'; 
-                      if (score >= 40) return 'bg-orange-500';
-                      return 'bg-red-500';
-                    };
-                    
-                    // Size based on weight (importance) - adjusted for 8-column grid
-                    const getSize = (weight: number, index: number) => {
-                      if (weight >= 6) return 'col-span-3 row-span-2'; // High importance
-                      if (weight >= 4) return 'col-span-2 row-span-1'; // Medium importance  
-                      if (index % 3 === 0) return 'col-span-2 row-span-1'; // Variety
-                      return 'col-span-1 row-span-1'; // Low importance
-                    };
-                    
-                    return (
-                      <div 
-                        key={item.category} 
-                        className={`${getRiskColor(item.score)} ${getSize(item.weight, index)} rounded text-white p-1 flex flex-col justify-between text-xs hover:scale-105 transition-transform cursor-pointer`}
-                        title={`${item.category}: ${item.score}/100 (Weight: ${item.weight})`}
-                      >
-                        <div className="font-medium leading-tight">{item.category.replace(/[&\/]/g, ' ')}</div>
-                        <div className="text-sm font-bold">{item.score}</div>
-                      </div>
-                    );
-                  })}
+              
+              {/* Pillar-based categorization of all 25 risk categories */}
+              <div className="space-y-6">
+                {/* Cybersecurity Pillar */}
+                <div className="border-l-4 border-blue-500 pl-4">
+                  <h3 className="text-md font-semibold text-blue-700 mb-3 flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Cybersecurity (9 categories)
+                  </h3>
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 px-2 text-gray-600">Category</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Score</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vendorData.scoreDetails.filter((item: any) => 
+                        ['Vulnerability Management', 'Attack Surface', 'Web/App Security', 'Cloud & Infra', 'Email Security', 'Code Repo Exposure', 'Endpoint Hygiene', 'IOC & Infra Threat', 'Detection & Response'].includes(item.category)
+                      ).map((item: any) => (
+                        <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-blue-50">
+                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-full bg-gray-200 rounded-full h-4">
+                                <div className={`h-4 rounded-full ${riskColor(item.score).split(' ')[0]}`} style={{ width: `${item.score}%` }}></div>
+                              </div>
+                              <span className="font-bold w-12 text-center">{item.score}</span>
+                            </div>
+                          </td>
+                          <td className="py-2 px-2">{item.weight}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Compliance Pillar */}
+                <div className="border-l-4 border-green-500 pl-4">
+                  <h3 className="text-md font-semibold text-green-700 mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Compliance (5 categories)
+                  </h3>
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 px-2 text-gray-600">Category</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Score</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vendorData.scoreDetails.filter((item: any) => 
+                        ['Certifications', 'Questionnaire Quality', 'Regulatory Violations', 'Privacy Compliance', 'Contractual Clauses'].includes(item.category)
+                      ).map((item: any) => (
+                        <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-green-50">
+                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-full bg-gray-200 rounded-full h-4">
+                                <div className={`h-4 rounded-full ${riskColor(item.score).split(' ')[0]}`} style={{ width: `${item.score}%` }}></div>
+                              </div>
+                              <span className="font-bold w-12 text-center">{item.score}</span>
+                            </div>
+                          </td>
+                          <td className="py-2 px-2">{item.weight}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Geopolitical Pillar */}
+                <div className="border-l-4 border-purple-500 pl-4">
+                  <h3 className="text-md font-semibold text-purple-700 mb-3 flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Geopolitical (6 categories)
+                  </h3>
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 px-2 text-gray-600">Category</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Score</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vendorData.scoreDetails.filter((item: any) => 
+                        ['Country Risk', 'Sector Risk', 'Company Size', 'Infra Jurisdiction', 'Concentration Risk', 'Environmental Exposure'].includes(item.category)
+                      ).map((item: any) => (
+                        <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-purple-50">
+                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-full bg-gray-200 rounded-full h-4">
+                                <div className={`h-4 rounded-full ${riskColor(item.score).split(' ')[0]}`} style={{ width: `${item.score}%` }}></div>
+                              </div>
+                              <span className="font-bold w-12 text-center">{item.score}</span>
+                            </div>
+                          </td>
+                          <td className="py-2 px-2">{item.weight}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Reputation Pillar */}
+                <div className="border-l-4 border-red-500 pl-4">
+                  <h3 className="text-md font-semibold text-red-700 mb-3 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Reputation (5 categories)
+                  </h3>
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 px-2 text-gray-600">Category</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Score</th>
+                        <th className="text-left py-2 px-2 text-gray-600">Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vendorData.scoreDetails.filter((item: any) => 
+                        ['Data Breach History', 'Credential/Data Leaks', 'Brand Spoofing', 'Dark Web Presence', 'Social Sentiment'].includes(item.category)
+                      ).map((item: any) => (
+                        <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-red-50">
+                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-full bg-gray-200 rounded-full h-4">
+                                <div className={`h-4 rounded-full ${riskColor(item.score).split(' ')[0]}`} style={{ width: `${item.score}%` }}></div>
+                              </div>
+                              <span className="font-bold w-12 text-center">{item.score}</span>
+                            </div>
+                          </td>
+                          <td className="py-2 px-2">{item.weight}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              <table className="min-w-full text-sm mt-6">
-                <thead>
-                  <tr>
-                    <th className="text-left py-2 px-2">Category</th>
-                    <th className="text-left py-2 px-2">Score</th>
-                    <th className="text-left py-2 px-2">Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vendorData.scoreDetails.map((item: any) => (
-                    <tr key={item.category} className="border-b last:border-b-0 hover:bg-gray-50">
-                      <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
-                      <td className="py-2 px-2">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-full bg-gray-200 rounded-full h-4">
-                            <div className={`h-4 rounded-full ${riskColor(item.score).split(' ')[0]}`} style={{ width: `${item.score}%` }}></div>
-                          </div>
-                          <span className="font-bold w-12 text-center">{item.score}</span>
-                        </div>
-                      </td>
-                      <td className="py-2 px-2">{item.weight}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </Card>)}
-            {!loading && (<Card>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Pillar Comparison</h2>
-              <div className="h-64 bg-gradient-to-br from-blue-50 to-purple-50 rounded p-6 flex items-center justify-center">
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Radar Chart with actual vendor data */}
-                  <svg viewBox="0 0 240 200" className="w-full h-full max-w-48">
-                    {/* Background grid circles */}
-                    <g stroke="#e5e7eb" strokeWidth="1" fill="none">
-                      <circle cx="120" cy="100" r="20" />
-                      <circle cx="120" cy="100" r="40" />
-                      <circle cx="120" cy="100" r="60" />
-                      <circle cx="120" cy="100" r="80" />
-                    </g>
-                    {/* Grid lines to axes */}
-                    <g stroke="#e5e7eb" strokeWidth="1">
-                      <line x1="120" y1="20" x2="120" y2="180" /> {/* Cyber */}
-                      <line x1="189" y1="100" x2="51" y2="100" /> {/* Compliance-Reputation */}
-                      <line x1="120" y1="20" x2="120" y2="180" /> {/* Geopolitical */}
-                    </g>
-                    {/* Data polygon based on actual scores */}
-                    <polygon 
-                      points={`120,${100 - (vendorData.scores.cybersecurity * 0.8)} ${120 + (vendorData.scores.compliance * 0.69)},${100 - (vendorData.scores.compliance * 0.4)} ${120 + (vendorData.scores.reputation * 0.69)},${100 + (vendorData.scores.reputation * 0.4)} 120,${100 + (vendorData.scores.geopolitical * 0.8)}`}
-                      fill="rgba(59, 130, 246, 0.2)" 
-                      stroke="rgb(59, 130, 246)" 
-                      strokeWidth="2"
-                    />
-                    {/* Data points */}
-                    <circle cx="120" cy={100 - (vendorData.scores.cybersecurity * 0.8)} r="3" fill="rgb(59, 130, 246)" />
-                    <circle cx={120 + (vendorData.scores.compliance * 0.69)} cy={100 - (vendorData.scores.compliance * 0.4)} r="3" fill="rgb(59, 130, 246)" />
-                    <circle cx={120 + (vendorData.scores.reputation * 0.69)} cy={100 + (vendorData.scores.reputation * 0.4)} r="3" fill="rgb(59, 130, 246)" />
-                    <circle cx="120" cy={100 + (vendorData.scores.geopolitical * 0.8)} r="3" fill="rgb(59, 130, 246)" />
-                    {/* Labels with scores */}
-                    <text x="120" y="12" textAnchor="middle" className="text-xs fill-gray-700 font-semibold">Cyber ({vendorData.scores.cybersecurity})</text>
-                    <text x="200" y="105" textAnchor="start" className="text-xs fill-gray-700 font-semibold">Compliance ({vendorData.scores.compliance})</text>
-                    <text x="200" y="140" textAnchor="start" className="text-xs fill-gray-700 font-semibold">Reputation ({vendorData.scores.reputation})</text>
-                    <text x="120" y="195" textAnchor="middle" className="text-xs fill-gray-700 font-semibold">Geopolitical ({vendorData.scores.geopolitical})</text>
-                  </svg>
-                </div>
-              </div>
-            </Card>)}
+ 
             {!loading && (<Card>
               <h2 className="text-lg font-semibold text-gray-800 mb-2">Insights</h2>
               <ul className="list-disc pl-6 text-sm text-gray-700 space-y-1">

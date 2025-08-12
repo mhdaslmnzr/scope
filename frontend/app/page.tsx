@@ -19,6 +19,7 @@ import VendorsTable from '@/components/VendorsTable';
 import NewVendorDetails from '@/components/NewVendorDetails';
 import VendorComparison from '@/components/VendorComparison';
 import AddVendor from '@/components/AddVendor';
+import Reports from '@/components/Reports';
 import HeatmapGrid from '@/components/charts/HeatmapGrid';
 import Card from '@/components/ui/Card';
 import Skeleton from '@/components/ui/Skeleton';
@@ -752,11 +753,7 @@ const pillarGroups = [
             ) : view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Social Sentiment' ? (
               <SocialSentimentTable />
             ) : view === 'reports' ? (
-              <div className="p-8 text-center text-gray-500">
-                <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <h2 className="text-xl font-semibold mb-2">Reports Coming Soon</h2>
-                <p>Advanced reporting and analytics features will be available in the next update.</p>
-              </div>
+              <Reports />
             ) : view === 'cortex' ? (
               <CortexEngine />
             ) : view === 'add-vendor' ? (
