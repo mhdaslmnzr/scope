@@ -1,6 +1,8 @@
 // frontend/components/intelligence/VulnerabilitiesTable.tsx
 import DataTable from '../ui/DataTable';
+import Badge from '../ui/Badge';
 import { ColumnDef } from '../../types';
+import { vendors } from '../../mock-data';
 
 type Vulnerability = {
   cve: string;
@@ -9,13 +11,37 @@ type Vulnerability = {
   status: 'Open' | 'In Progress' | 'Closed';
   date: string;
 };
-const MOCK_VULNS: Vulnerability[] = [
-  { cve: 'CVE-2024-1234', vendor: 'Acme Corp', severity: 'Critical', status: 'Open', date: '2024-06-10' },
-  { cve: 'CVE-2024-2345', vendor: 'CyberSafe', severity: 'High', status: 'In Progress', date: '2024-06-09' },
-  { cve: 'CVE-2023-9999', vendor: 'D Pharma', severity: 'Medium', status: 'Closed', date: '2024-06-08' },
-  { cve: 'CVE-2022-8888', vendor: 'DataVault', severity: 'Low', status: 'Open', date: '2024-06-07' },
-  { cve: 'CVE-2024-5678', vendor: 'Acme Corp', severity: 'High', status: 'Open', date: '2024-06-06' },
-];
+
+// Generate dynamic vulnerability data based on actual vendor scores
+const generateVulnerabilities = (): Vulnerability[] => {
+  const vulns: Vulnerability[] = [];
+  vendors.forEach(vendor => {
+    const vulnScore = vendor.scoreDetails.find(s => s.category === 'Vulnerability Management')?.score || 50;
+    
+    // Generate more vulns for vendors with lower vulnerability management scores
+    const vulnCount = vulnScore < 40 ? 3 : vulnScore < 60 ? 2 : 1;
+    
+    for (let i = 0; i < vulnCount; i++) {
+      const severity = vulnScore < 30 ? 'Critical' : 
+                     vulnScore < 50 ? 'High' : 
+                     vulnScore < 70 ? 'Medium' : 'Low';
+      
+      const status = vulnScore < 40 ? 'Open' : 
+                    vulnScore < 70 ? 'In Progress' : 'Closed';
+      
+      vulns.push({
+        cve: `CVE-2024-${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`,
+        vendor: vendor.name,
+        severity: severity as any,
+        status: status as any,
+        date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      });
+    }
+  });
+  return vulns.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+const VULNERABILITIES = generateVulnerabilities();
 
 const columns: ColumnDef<Vulnerability>[] = [
   {
@@ -32,17 +58,18 @@ const columns: ColumnDef<Vulnerability>[] = [
     header: 'Severity',
     cell: (row) => {
       const severity = row.severity;
-      const color =
-        severity === 'Critical' ? 'text-red-700' :
-        severity === 'High' ? 'text-orange-700' :
-        severity === 'Medium' ? 'text-yellow-700' :
-        'text-green-700';
-      return <span className={`font-semibold ${color}`}>{severity}</span>;
+      const tone = severity === 'Critical' ? 'red' : severity === 'High' ? 'orange' : severity === 'Medium' ? 'yellow' : 'green';
+      return <Badge tone={tone as any}>{severity}</Badge>;
     },
   },
   {
     accessorKey: 'status',
     header: 'Status',
+    cell: (row) => {
+      const status = row.status;
+      const tone = status === 'Open' ? 'red' : status === 'In Progress' ? 'yellow' : 'green';
+      return <Badge tone={tone as any}>{status}</Badge>;
+    },
   },
   {
     accessorKey: 'date',

@@ -1,496 +1,306 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Search, User, Shield, Users, FileText, BarChart3, Eye, AlertTriangle, Globe, TrendingUp, Bell, Activity, LineChart, Plus, X, ChevronLeft, ChevronRight, Upload, Building, MapPin, Users as UsersIcon, DollarSign, Server, Lock, Shield as ShieldIcon, Globe as GlobeIcon, FileText as FileTextIcon, ArrowLeft, RefreshCw, FileDown, FileUp, BarChart2, Pencil as EditIcon } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { 
+  Shield, 
+  FileText, 
+  TrendingUp, 
+  AlertTriangle, 
+  Bell, 
+  Activity,
+  ArrowUpRight,
+  ArrowDownRight,
+  LineChart,
+  BarChart3
+} from 'lucide-react';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+import Sidebar from '@/components/Sidebar';
+import VendorsTable from '@/components/VendorsTable';
+import NewVendorDetails from '@/components/NewVendorDetails';
+import VendorComparison from '@/components/VendorComparison';
+import AddVendor from '@/components/AddVendor';
+import HeatmapGrid from '@/components/charts/HeatmapGrid';
+import Card from '@/components/ui/Card';
+import Skeleton from '@/components/ui/Skeleton';
+import { vendors, riskColor, criticalityColors } from '@/mock-data';
+import CybersecurityHome from '@/components/intelligence/CybersecurityHome';
+import ComplianceHome from '@/components/intelligence/ComplianceHome';
+import GeopoliticalHome from '@/components/intelligence/GeopoliticalHome';
+import ReputationHome from '@/components/intelligence/ReputationHome';
+import VulnerabilitiesTable from '@/components/intelligence/VulnerabilitiesTable';
+import AttackSurfaceTable from '@/components/intelligence/AttackSurfaceTable';
+import WebAppSecurityTable from '@/components/intelligence/WebAppSecurityTable';
+import CloudInfraTable from '@/components/intelligence/CloudInfraTable';
+import EmailSecurityTable from '@/components/intelligence/EmailSecurityTable';
+import CodeRepoExposureTable from '@/components/intelligence/CodeRepoExposureTable';
+import EndpointHygieneTable from '@/components/intelligence/EndpointHygieneTable';
+import IOCInfraThreatTable from '@/components/intelligence/IOCInfraThreatTable';
+import DetectionResponseTable from '@/components/intelligence/DetectionResponseTable';
+import CertificationsTable from '@/components/intelligence/CertificationsTable';
+import QuestionnaireResultsTable from '@/components/intelligence/QuestionnaireResultsTable';
+import RegulatoryViolationsTable from '@/components/intelligence/RegulatoryViolationsTable';
+import PrivacyComplianceTable from '@/components/intelligence/PrivacyComplianceTable';
+import ContractualClausesTable from '@/components/intelligence/ContractualClausesTable';
+import CountryRiskTable from '@/components/intelligence/CountryRiskTable';
+import SectorRiskTable from '@/components/intelligence/SectorRiskTable';
+import CompanySizeTable from '@/components/intelligence/CompanySizeTable';
+import InfraJurisdictionTable from '@/components/intelligence/InfraJurisdictionTable';
+import ConcentrationRiskTable from '@/components/intelligence/ConcentrationRiskTable';
+import EnvironmentalExposureTable from '@/components/intelligence/EnvironmentalExposureTable';
+import DataBreachHistoryTable from '@/components/intelligence/DataBreachHistoryTable';
+import CredentialDataLeaksTable from '@/components/intelligence/CredentialDataLeaksTable';
+import BrandSpoofingTable from '@/components/intelligence/BrandSpoofingTable';
+import DarkWebPresenceTable from '@/components/intelligence/DarkWebPresenceTable';
+import SocialSentimentTable from '@/components/intelligence/SocialSentimentTable';
+import CortexEngine from '@/components/CortexEngine';
 
-import Sidebar from '../components/Sidebar';
-import VendorsTable from '../components/VendorsTable';
-import VendorComparison from '../components/VendorComparison';
-import Card from '../components/ui/Card';
-import Sparkline from '../components/ui/Sparkline';
-import { vendors } from '../mock-data';
+export default function Home() {
+  const [view, setView] = useState<'dashboard' | 'vendors' | 'intelligence' | 'reports' | 'cortex' | 'add-vendor'>('dashboard');
+  const [selectedVendor, setSelectedVendor] = useState<any>(null);
+  const [selectedPillar, setSelectedPillar] = useState<string | null>('Cybersecurity');
+  const [selectedSubItem, setSelectedSubItem] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [comparisonVendorIds, setComparisonVendorIds] = useState<string[]>([]);
+  const [useNewDetailsView, setUseNewDetailsView] = useState(false);
 
-// Intelligence Page Components
-import CybersecurityHome from '../components/intelligence/CybersecurityHome';
-import ComplianceHome from '../components/intelligence/ComplianceHome';
-import GeopoliticalHome from '../components/intelligence/GeopoliticalHome';
-import ReputationHome from '../components/intelligence/ReputationHome';
-import VulnerabilitiesTable from '../components/intelligence/VulnerabilitiesTable';
-import AttackSurfaceTable from '../components/intelligence/AttackSurfaceTable';
-import WebAppSecurityTable from '../components/intelligence/WebAppSecurityTable';
-import CloudInfraTable from '../components/intelligence/CloudInfraTable';
-import EmailSecurityTable from '../components/intelligence/EmailSecurityTable';
-import CodeRepoExposureTable from '../components/intelligence/CodeRepoExposureTable';
-import EndpointHygieneTable from '../components/intelligence/EndpointHygieneTable';
-import IOCInfraThreatTable from '../components/intelligence/IOCInfraThreatTable';
-import DetectionResponseTable from '../components/intelligence/DetectionResponseTable';
-import CertificationsTable from '../components/intelligence/CertificationsTable';
-import QuestionnaireResultsTable from '../components/intelligence/QuestionnaireResultsTable';
-import RegulatoryViolationsTable from '../components/intelligence/RegulatoryViolationsTable';
-import PrivacyComplianceTable from '../components/intelligence/PrivacyComplianceTable';
-import ContractualClausesTable from '../components/intelligence/ContractualClausesTable';
-import CountryRiskTable from '../components/intelligence/CountryRiskTable';
-import SectorRiskTable from '../components/intelligence/SectorRiskTable';
-import CompanySizeTable from '../components/intelligence/CompanySizeTable';
-import InfraJurisdictionTable from '../components/intelligence/InfraJurisdictionTable';
-import ConcentrationRiskTable from '../components/intelligence/ConcentrationRiskTable';
-import EnvironmentalExposureTable from '../components/intelligence/EnvironmentalExposureTable';
-import DataBreachHistoryTable from '../components/intelligence/DataBreachHistoryTable';
-import CredentialDataLeaksTable from '../components/intelligence/CredentialDataLeaksTable';
-import BrandSpoofingTable from '../components/intelligence/BrandSpoofingTable';
-import DarkWebPresenceTable from '../components/intelligence/DarkWebPresenceTable';
-import SocialSentimentTable from '../components/intelligence/SocialSentimentTable';
+  const dashboardVendor = vendors[0];
+
+  const filteredVendors = vendors.filter(vendor =>
+    vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    vendor.sector.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    vendor.country.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
 const quickStats = [
-  { label: 'Total Vendors', value: 42, icon: <Users className="w-5 h-5 text-blue-600" /> },
-  { label: 'High Risk Vendors', value: 5, icon: <AlertTriangle className="w-5 h-5 text-red-600" /> },
+    { label: 'Total Vendors', value: vendors.length, icon: <Shield className="w-5 h-5 text-blue-600" /> },
+    { label: 'High Risk Vendors', value: vendors.filter(v => (v.scores?.aggregate || 0) < 50).length, icon: <AlertTriangle className="w-5 h-5 text-red-600" /> },
   { label: 'Open Alerts', value: 3, icon: <Bell className="w-5 h-5 text-yellow-500" /> },
-  { label: 'Last Scan', value: '2h ago', icon: <Activity className="w-5 h-5 text-green-600" /> },
-];
+    { label: 'Last Scan', value: '2h ago', icon: <Activity className="w-5 h-5 text-green-600" /> }
+  ];
 
-const recentActivity = [
-  { icon: <AlertTriangle className="w-4 h-4 text-red-500" />, text: 'Vendor "Acme Corp" flagged as High Risk', time: '5 min ago' },
-  { icon: <Users className="w-4 h-4 text-blue-500" />, text: 'New vendor "CyberSafe" onboarded', time: '30 min ago' },
-  { icon: <FileText className="w-4 h-4 text-green-500" />, text: 'Compliance report generated for "D Pharma"', time: '1 hr ago' },
-  { icon: <Globe className="w-4 h-4 text-purple-500" />, text: 'Geopolitical risk updated for "Asia-Pacific"', time: '2 hr ago' },
-];
-
-const criticalityColors: Record<string, string> = {
-  Critical: 'bg-red-100 text-red-700',
-  High: 'bg-orange-100 text-orange-700',
-  Medium: 'bg-yellow-100 text-yellow-700',
-  Low: 'bg-green-100 text-green-700',
-};
-
-const scoreColors = (score: number) => {
-  if (score < 50) return 'bg-red-100 text-red-700';
-  if (score < 70) return 'bg-orange-100 text-orange-700';
-  if (score < 85) return 'bg-yellow-100 text-yellow-700';
-  return 'bg-green-100 text-green-700';
-};
-
-const riskColor = (score: number) => {
-  if (score < 50) return 'bg-red-100 text-red-700 border-red-300';
-  if (score < 70) return 'bg-orange-100 text-orange-700 border-orange-300';
-  if (score < 85) return 'bg-yellow-100 text-yellow-700 border-yellow-300';
-  return 'bg-green-100 text-green-700 border-green-300';
-};
-
-const scoreExplanations: Record<string, string> = {
-  'Vulnerability Management': 'Assesses open CVEs, patch cycles, and outdated software.',
-  'Attack Surface': 'Evaluates open ports, misconfigured services, and exposed assets.',
-  'Web/App Security': 'Checks TLS version, CMS exposure, and authentication endpoints.',
-  'Cloud & Infra': 'Reviews S3 buckets, API security, and cloud config hygiene.',
-  'Email Security': 'Checks SPF, DKIM, and DMARC presence.',
-  'Code Repo Exposure': 'Detects hardcoded secrets and public GitHub leaks.',
-  'Endpoint Hygiene': 'Assesses use of MDM, AV, and device control.',
-  'IOC & Infra Threat': 'Looks for blacklisted IPs, C2 infrastructure, and threat feed matches.',
-  'Detection & Response': 'Measures SOC readiness, IR plans, and logging coverage.',
-  'Certifications': 'Considers ISO 27001, SOC2, NIST CSF, PCI DSS, etc.',
-  'Questionnaire Quality': 'Evaluates depth and honesty in SIG/OpenFAIR/NIST documents.',
-  'Regulatory Violations': 'Checks for sanctions, fines, or penalties from data protection bodies.',
-  'Privacy Compliance': 'Assesses GDPR, HIPAA, CCPA alignment.',
-  'Contractual Clauses': 'Checks encryption, MFA, audit rights in contracts.',
-  'Country Risk': 'Considers political instability, sanctions, cyber laws, OFAC lists.',
-  'Sector Risk': 'Industry classification (e.g., Finance = High risk).',
-  'Company Size': 'Global footprint, employee size, asset sprawl.',
-  'Infra Jurisdiction': 'Location of hosted systems and legal exposure.',
-  'Concentration Risk': 'Critical vendor used across multiple internal systems.',
-  'Environmental Exposure': 'Natural disaster risk at HQ or primary DC.',
-  'Data Breach History': 'Known breaches, data loss events.',
-  'Credential/Data Leaks': 'Leaked email/password, exposed keys.',
-  'Brand Spoofing': 'Typosquatting, cloned sites, social spoofing.',
-  'Dark Web Presence': 'Mentions in threat actor channels, paste dumps.',
-  'Social Sentiment': 'Media coverage, defacements, hacktivist attention.',
-};
-
-const pillarGroups = [
-  {
-    name: 'Cybersecurity',
-    color: 'blue',
-    keys: [
-      'Vulnerability Management', 'Attack Surface', 'Web/App Security', 'Cloud & Infra', 'Email Security', 'Code Repo Exposure', 'Endpoint Hygiene', 'IOC & Infra Threat', 'Detection & Response',
-    ],
-  },
-  {
-    name: 'Compliance',
-    color: 'green',
-    keys: [
-      'Certifications', 'Questionnaire Quality', 'Regulatory Violations', 'Privacy Compliance', 'Contractual Clauses',
-    ],
-  },
-  {
-    name: 'Geopolitical',
-    color: 'purple',
-    keys: [
-      'Country Risk', 'Sector Risk', 'Company Size', 'Infra Jurisdiction', 'Concentration Risk', 'Environmental Exposure',
-    ],
-  },
-  {
-    name: 'Reputation',
-    color: 'red',
-    keys: [
-      'Data Breach History', 'Credential/Data Leaks', 'Brand Spoofing', 'Dark Web Presence', 'Social Sentiment',
-    ],
-  },
-];
-
-function calculatePillarScore(scoreDetails: any[], pillarCategories: string[]) {
-  const items = scoreDetails.filter(item => pillarCategories.includes(item.category));
-  const weightedSum = items.reduce((sum, item) => sum + item.score * item.weight, 0);
-  const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
-  return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
-}
-
-function calculateAggregateScore(scoreDetails: any[]) {
-  const weightedSum = scoreDetails.reduce((sum, item) => sum + item.score * item.weight, 0);
-  const totalWeight = scoreDetails.reduce((sum, item) => sum + item.weight, 0);
-  return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
-}
-
-function applyCriticalityMultiplier(aggregateScore: number, criticality: string) {
-  const multipliers: Record<string, number> = {
-    'Critical': 1.25,
-    'High': 1.10,
-    'Medium': 1.00,
-    'Low': 0.85,
-  };
-  return Math.round(aggregateScore * (multipliers[criticality] || 1.0));
-}
-
-function VendorDetails({ vendor, onBack }: { vendor: any, onBack: () => void }) {
-  const [editMode, setEditMode] = useState(false);
-  const [notes, setNotes] = useState([
-    { id: 1, text: 'Follow up on compliance docs before next assessment.', date: '2024-06-10' },
-    { id: 2, text: 'Vendor flagged for high breach risk last quarter.', date: '2024-05-15' },
-  ]);
-  const [newNote, setNewNote] = useState('');
-  const [tags, setTags] = useState(['Critical', 'Watchlist']);
-  const [tagInput, setTagInput] = useState('');
-  const [simulateMode, setSimulateMode] = useState(false);
-  const [simulatedScores, setSimulatedScores] = useState(vendor.scoreDetails);
-
-  const timeline = [
-    { date: vendor.lastAssessment, label: 'Last Assessment', icon: <BarChart3 className="w-4 h-4 text-blue-600" /> },
-    { date: vendor.lastScan, label: 'Last Scan', icon: <Activity className="w-4 h-4 text-green-600" /> },
-    { date: '2024-05-01', label: 'Breach Detected', icon: <AlertTriangle className="w-4 h-4 text-red-600" /> },
-    { date: '2024-04-01', label: 'Onboarded', icon: <Users className="w-4 h-4 text-purple-600" /> },
+  const riskDistribution = [
+    { label: 'Critical', count: vendors.filter(v => (v.scores?.aggregate || 0) < 30).length, color: 'bg-red-500' },
+    { label: 'High', count: vendors.filter(v => (v.scores?.aggregate || 0) >= 30 && (v.scores?.aggregate || 0) < 50).length, color: 'bg-orange-500' },
+    { label: 'Medium', count: vendors.filter(v => (v.scores?.aggregate || 0) >= 50 && (v.scores?.aggregate || 0) < 70).length, color: 'bg-yellow-500' },
+    { label: 'Low', count: vendors.filter(v => (v.scores?.aggregate || 0) >= 70).length, color: 'bg-green-500' }
   ];
 
   const trendData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'Aggregate Score',
-        data: [60, 62, 65, 58, vendor.scores?.aggregate || 70, vendor.scores?.aggregate || 70],
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37,99,235,0.1)',
-        tension: 0.4,
-        pointRadius: 3,
-      },
-    ],
-  };
-  const trendOptions = {
-    responsive: true,
-    plugins: { legend: { display: false } },
-    scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } },
+    datasets: [{
+      label: 'Aggregate Score',
+      data: [60, 62, 65, 58, dashboardVendor.scores?.aggregate || 70, dashboardVendor.scores?.aggregate || 70],
+      borderColor: '#2563eb',
+      backgroundColor: 'rgba(37,99,235,0.1)',
+      tension: 0.4,
+      pointRadius: 3,
+    }]
   };
 
-  const handleScoreChange = (category: string, newScore: number) => {
-    setSimulatedScores(
-      simulatedScores.map((item: any) =>
-        item.category === category ? { ...item, score: newScore } : item
-      )
-    );
-  };
-
-  const scoresToUse = simulateMode ? simulatedScores : vendor.scoreDetails;
-
-  const cybersecurity = calculatePillarScore(scoresToUse, pillarGroups[0].keys);
-  const compliance = calculatePillarScore(scoresToUse, pillarGroups[1].keys);
-  const geopolitical = calculatePillarScore(scoresToUse, pillarGroups[2].keys);
-  const reputation = calculatePillarScore(scoresToUse, pillarGroups[3].keys);
-  const aggregate = calculateAggregateScore(scoresToUse);
-  const aggregateWithMultiplier = applyCriticalityMultiplier(aggregate, vendor.criticality);
-
-  const pillarScores = [
-    { name: 'Cybersecurity', icon: <Shield className="w-6 h-6 mb-2" />, score: cybersecurity },
-    { name: 'Compliance', icon: <FileText className="w-6 h-6 mb-2" />, score: compliance },
-    { name: 'Geopolitical', icon: <Globe className="w-6 h-6 mb-2" />, score: geopolitical },
-    { name: 'Reputation', icon: <AlertTriangle className="w-6 h-6 mb-2" />, score: reputation },
+const recentActivity = [
+  { icon: <AlertTriangle className="w-4 h-4 text-red-500" />, text: 'Vendor "Acme Corp" flagged as High Risk', time: '5 min ago' },
+    { icon: <Shield className="w-4 h-4 text-blue-500" />, text: 'New vulnerability detected in Cloud Infrastructure', time: '15 min ago' },
+    { icon: <TrendingUp className="w-4 h-4 text-green-500" />, text: 'Compliance score improved for 3 vendors', time: '1 hour ago' }
   ];
 
-  const groupedScores = pillarGroups.map(group => ({
-    ...group,
-    items: scoresToUse.filter((item: any) => group.keys.includes(item.category)) || [],
-  }));
+const pillarGroups = [
+  {
+    name: 'Cybersecurity',
+      icon: <Shield className="w-8 h-8 text-blue-600" />,
+      color: 'bg-blue-100 text-blue-600',
+      avgScore: Math.round(vendors.reduce((sum, v) => sum + (v.scores?.cybersecurity || 0), 0) / vendors.length),
+      keys: ['Vulnerability Management', 'Attack Surface', 'Web/App Security', 'Cloud & Infra', 'Email Security', 'Code Repo Exposure', 'Endpoint Hygiene', 'IOC & Infra Threat', 'Detection & Response']
+  },
+  {
+    name: 'Compliance',
+      icon: <FileText className="w-8 h-8 text-green-600" />,
+      color: 'bg-green-100 text-green-600',
+      avgScore: Math.round(vendors.reduce((sum, v) => sum + (v.scores?.compliance || 0), 0) / vendors.length),
+      keys: ['Certifications', 'Questionnaire Results', 'Regulatory Violations', 'Privacy Compliance', 'Contractual Clauses']
+  },
+  {
+    name: 'Geopolitical',
+      icon: <TrendingUp className="w-8 h-8 text-purple-600" />,
+      color: 'bg-purple-100 text-purple-600',
+      avgScore: Math.round(vendors.reduce((sum, v) => sum + (v.scores?.geopolitical || 0), 0) / vendors.length),
+      keys: ['Country Risk', 'Sector Risk', 'Company Size', 'Infra Jurisdiction', 'Concentration Risk', 'Environmental Exposure']
+  },
+  {
+    name: 'Reputation',
+      icon: <AlertTriangle className="w-8 h-8 text-red-600" />,
+      color: 'bg-red-100 text-red-600',
+      avgScore: Math.round(vendors.reduce((sum, v) => sum + (v.scores?.reputation || 0), 0) / vendors.length),
+      keys: ['Data Breach History', 'Credential/Data Leaks', 'Brand Spoofing', 'Dark Web Presence', 'Social Sentiment']
+    }
+  ];
 
-  if (editMode) {
-    return (
-      <div className="space-y-8">
-        <button onClick={() => setEditMode(false)} className="flex items-center text-blue-600 hover:underline mb-2"><ArrowLeft className="w-4 h-4 mr-1" /> Back to Details</button>
-        <div className="text-lg font-semibold text-gray-900">Edit Vendor (Coming Soon)</div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-10 max-w-6xl mx-auto px-4 py-8">
-      {/* Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-2">
-        <div className="flex items-center space-x-2">
-          <button onClick={onBack} className="flex items-center text-blue-600 hover:underline"><ArrowLeft className="w-4 h-4 mr-1" /> Back</button>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center space-x-2 ml-2">
-            <Users className="w-6 h-6 text-blue-600" />
-            <span>{vendor.name}</span>
-            <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold ${criticalityColors[vendor.criticality]}`}>{vendor.criticality}</span>
-            <span className={`ml-2 px-3 py-1 rounded-full text-lg font-bold border ${riskColor(aggregateWithMultiplier)}`}>{aggregateWithMultiplier}</span>
-          </h1>
-          <div className="flex flex-wrap gap-2 ml-4">
-            {tags.map(tag => (
-              <span key={tag} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                {tag}
-                <button onClick={() => setTags(tags.filter(t => t !== tag))} className="ml-1 text-blue-400 hover:text-blue-700">×</button>
-              </span>
-            ))}
-            <input
-              type="text"
-              value={tagInput}
-              onChange={e => setTagInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && tagInput.trim()) { setTags([...tags, tagInput.trim()]); setTagInput(''); }}}
-              placeholder="Add tag"
-              className="w-20 px-2 py-1 border border-gray-300 rounded-full text-xs focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-        <div className="flex flex-col md:items-end gap-3 mt-4 md:mt-0">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">Last Scan:</span>
-            <span className="font-medium text-gray-900">{vendor.lastScan || 'N/A'}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">Last Assessment:</span>
-            <span className="font-medium text-gray-900">{vendor.lastAssessment || 'N/A'}</span>
-          </div>
-          <div className="flex gap-2 mt-2">
-            <button className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition text-sm"><RefreshCw className="w-4 h-4" /> <span>Reassess Now</span></button>
-            <button onClick={() => setEditMode(true)} className="flex items-center space-x-2 border border-blue-600 text-blue-600 px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition text-sm"><EditIcon className="w-4 h-4" /> <span>Edit</span></button>
-            <button className="flex items-center space-x-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition text-sm"><FileDown className="w-4 h-4" /> PDF</button>
-            <button className="flex items-center space-x-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow hover:bg-gray-100 transition text-sm"><FileDown className="w-4 h-4" /> CSV</button>
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Pillar Scores</h2>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">Score Simulator</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" checked={simulateMode} onChange={() => setSimulateMode(!simulateMode)} className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {pillarScores.map((pillar) => (
-          <div key={pillar.name} className={`rounded-2xl shadow-lg border p-8 flex flex-col items-center min-h-[140px] transition ${riskColor(pillar.score)} w-full`}>
-            {pillar.icon}
-            <div className="text-2xl font-bold mb-1">{pillar.score}</div>
-            <div className="text-sm text-gray-700 font-semibold">{pillar.name}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 flex flex-col justify-center min-h-[120px">
-          <div className="flex items-center mb-2">
-            <Lock className="w-5 h-5 text-red-600 mr-2" />
-            <span className="font-semibold text-gray-900">Chances of Breach</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex-1 bg-gray-200 rounded-full h-4">
-              <div className="bg-red-600 h-4 rounded-full transition-all duration-300" style={{ width: `${Math.round((vendor.breachChance || 0) * 100)}%` }}></div>
-            </div>
-            <span className="text-lg font-bold text-red-600">{Math.round((vendor.breachChance || 0) * 100)}%</span>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 flex flex-col gap-3 justify-center min-h-[120px]">
-          <div className="font-semibold text-gray-900 mb-2 flex items-center"><FileText className="w-5 h-5 text-blue-600 mr-2" />Questionnaires</div>
-          <div className="flex gap-3">
-            <button className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition ${vendor.questionnaires?.nist ? 'bg-blue-50 border-blue-600 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400'}`}>{vendor.questionnaires?.nist ? <FileDown className="w-4 h-4" /> : <FileUp className="w-4 h-4" />}NIST SP</button>
-            <button className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition ${vendor.questionnaires?.sig ? 'bg-blue-50 border-blue-600 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400'}`}>{vendor.questionnaires?.sig ? <FileDown className="w-4 h-4" /> : <FileUp className="w-4 h-4" />}SIG</button>
-            <button className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg border transition ${vendor.questionnaires?.openfair ? 'bg-blue-50 border-blue-600 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400'}`}>{vendor.questionnaires?.openfair ? <FileDown className="w-4 h-4" /> : <FileUp className="w-4 h-4" />}OpenFAIR</button>
-          </div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-          <div className="font-semibold text-gray-900 mb-4 flex items-center"><Activity className="w-5 h-5 text-blue-600 mr-2" />Vendor History</div>
-          <ol className="relative border-l-2 border-blue-200 ml-2">
-            {timeline.map((event, idx) => (
-              <li key={idx} className="mb-6 ml-4">
-                <div className="absolute -left-5 flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full border-2 border-blue-300">{event.icon}</div>
-                <div className="pl-6">
-                  <div className="text-xs text-gray-400">{event.date}</div>
-                  <div className="font-medium text-gray-900">{event.label}</div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 flex flex-col items-center">
-          <div className="font-semibold text-gray-900 mb-4 flex items-center"><LineChart className="w-5 h-5 text-blue-600 mr-2" />Risk Trend</div>
-          <div className="w-full h-40">
-            <Line data={trendData} options={trendOptions} />
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-6">
-        <div className="font-semibold text-gray-900 mb-4 flex items-center"><BarChart3 className="w-5 h-5 text-blue-600 mr-2" />Score Breakdown</div>
-        <div className="divide-y divide-gray-100">
-          {groupedScores.map((group) => (
-            <div key={group.name}>
-              <div className="py-3 px-2 text-left font-semibold text-lg text-blue-700 flex items-center gap-2">{group.name}</div>
-              <table className="min-w-full text-sm mb-4">
-                <thead className="bg-gray-50">
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left font-semibold text-gray-500 w-1/4">Category</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-500 w-1/2">Score</th>
-                    <th className="px-4 py-2 text-left font-semibold text-gray-500">Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {group.items.map((item: any) => (
-                    <tr key={item.category} className="border-b last:border-b-0 hover:bg-gray-50 cursor-pointer" onClick={() => console.log('Show details for', item.category)}>
-                      <td className="px-4 py-2 text-gray-700 whitespace-nowrap">{item.category}</td>
-                      <td className="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
-                        {simulateMode ? (
-                          <div className="flex items-center space-x-3">
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              value={item.score}
-                              onChange={(e) => handleScoreChange(item.category, parseInt(e.target.value))}
-                              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                            />
-                            <span className="font-bold w-12 text-center">{item.score}</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center space-x-3">
-                            <div className="w-full bg-gray-200 rounded-full h-4">
-                              <div className={`h-4 rounded-full ${riskColor(item.score).split(' ')[0]}`} style={{ width: `${item.score}%` }}></div>
-                            </div>
-                            <span className="font-bold w-12 text-center">{item.score}</span>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-2 text-gray-500 whitespace-nowrap">{item.weight}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="font-semibold text-gray-900 flex items-center"><UsersIcon className="w-5 h-5 text-blue-600 mr-2" />Vendor Information</div>
-          <button onClick={() => setEditMode(true)} className="flex items-center space-x-2 border border-blue-600 text-blue-600 px-4 py-2 rounded-lg shadow hover:bg-blue-50 transition text-sm"><EditIcon className="w-4 h-4" /> <span>Edit</span></button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div><span className="text-gray-500">Name:</span> <span className="font-medium text-gray-900">{vendor.name}</span></div>
-          <div><span className="text-gray-500">Country:</span> <span className="font-medium text-gray-900">{vendor.country}</span></div>
-          <div><span className="text-gray-500">Industry:</span> <span className="font-medium text-gray-900">{vendor.sector}</span></div>
-          <div><span className="text-gray-500">Website:</span> <a href={vendor.website} className="font-medium text-blue-700 underline" target="_blank" rel="noopener noreferrer">{vendor.website}</a></div>
-          <div><span className="text-gray-500">Employee Count:</span> <span className="font-medium text-gray-900">{vendor.employeeCount || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Annual Revenue:</span> <span className="font-medium text-gray-900">{vendor.revenue || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Asset Importance:</span> <span className="font-medium text-gray-900">{vendor.assetImportance || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Function:</span> <span className="font-medium text-gray-900">{vendor.function || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Products Used:</span> <span className="font-medium text-gray-900">{vendor.products?.join(', ') || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Global Footprint:</span> <span className="font-medium text-gray-900">{vendor.globalFootprint || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Data Center Region:</span> <span className="font-medium text-gray-900">{vendor.dataCenterRegion || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Internal Dependencies:</span> <span className="font-medium text-gray-900">{vendor.internalDependencies || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Certifications:</span> <span className="font-medium text-gray-900">{vendor.certifications || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Frameworks:</span> <span className="font-medium text-gray-900">{vendor.frameworks || 'N/A'}</span></div>
-          <div><span className="text-gray-500">EDR/AV:</span> <span className="font-medium text-gray-900">{vendor.edrAv ? 'Yes' : 'No'}</span></div>
-          <div><span className="text-gray-500">MDM/BYOD:</span> <span className="font-medium text-gray-900">{vendor.mdmByod ? 'Yes' : 'No'}</span></div>
-          <div><span className="text-gray-500">Incident Response Plan:</span> <span className="font-medium text-gray-900">{vendor.incidentResponsePlan ? 'Yes' : 'No'}</span></div>
-          <div><span className="text-gray-500">Public IP:</span> <span className="font-medium text-gray-900">{vendor.publicIp || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Known Subdomains:</span> <span className="font-medium text-gray-900">{vendor.subdomains || 'N/A'}</span></div>
-          <div><span className="text-gray-500">GitHub Org:</span> <span className="font-medium text-gray-900">{vendor.githubOrg || 'N/A'}</span></div>
-          <div><span className="text-gray-500">Compliance Document:</span> <span className="font-medium text-gray-900">{vendor.complianceDoc ? 'Yes' : 'No'}</span></div>
-          <div><span className="text-gray-500">Last Audit Date:</span> <span className="font-medium text-gray-900">{vendor.lastAuditDate || 'N/A'}</span></div>
-        </div>
-      </div>
-      
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-6">
-        <div className="font-semibold text-gray-900 mb-4 flex items-center"><FileText className="w-5 h-5 text-blue-600 mr-2" />Internal Notes & Comments</div>
-        <ul className="mb-4 space-y-2">
-          {notes.map(note => (
-            <li key={note.id} className="flex items-center justify-between bg-blue-50 rounded px-3 py-2">
-              <span className="text-sm text-gray-800">{note.text}</span>
-              <span className="text-xs text-gray-400 ml-2">{note.date}</span>
-              <button onClick={() => setNotes(notes.filter(n => n.id !== note.id))} className="ml-2 text-red-400 hover:text-red-700 text-xs">Delete</button>
-            </li>
-          ))}
-        </ul>
-        <form onSubmit={e => { e.preventDefault(); if (newNote.trim()) { setNotes([...notes, { id: Date.now(), text: newNote, date: new Date().toISOString().slice(0, 10) }]); setNewNote(''); }}} className="flex gap-2">
-          <input
-            type="text"
-            value={newNote}
-            onChange={e => setNewNote(e.target.value)}
-            placeholder="Add a note..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          />
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">Add</button>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-
-export default function Dashboard() {
-  const [view, setView] = useState<'dashboard' | 'vendors' | 'intelligence' | 'reports'>('dashboard');
-  const [selectedVendor, setSelectedVendor] = useState<any>(null);
-  const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
-  const [selectedSubItem, setSelectedSubItem] = useState<string | null>(null);
-  const [comparisonVendorIds, setComparisonVendorIds] = useState<string[]>([]);
-
-  const dashboardVendor = vendors[0];
   const dashboardCybersecurity = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[0].keys);
   const dashboardCompliance = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[1].keys);
   const dashboardGeopolitical = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[2].keys);
   const dashboardReputation = calculatePillarScore(dashboardVendor.scoreDetails, pillarGroups[3].keys);
-  const dashboardAggregate = calculateAggregateScore(dashboardVendor.scoreDetails);
 
-  const sparklineData = [
-    { value: 60 }, { value: 62 }, { value: 65 }, { value: 58 }, { value: 70 },
-  ];
-
-  const handleCompare = (vendorsToCompare: any[]) => {
-    setComparisonVendorIds(vendorsToCompare.map(v => v.name));
-  };
+  function calculatePillarScore(scoreDetails: any[], keys: string[]): number {
+    const relevantScores = scoreDetails.filter(item => keys.includes(item.category));
+    if (relevantScores.length === 0) return 0;
+    
+    const totalWeight = relevantScores.reduce((sum, item) => sum + (item.weight || 1), 0);
+    const weightedSum = relevantScores.reduce((sum, item) => sum + (item.score * (item.weight || 1)), 0);
+    
+    return Math.round(weightedSum / totalWeight);
+  }
 
   const handleBackToVendors = () => {
     setComparisonVendorIds([]);
+    setView('vendors');
   };
 
-  const handleSelectVendor = (vendor: any) => {
-    setSelectedVendor(vendor);
-    setView('vendors');
+  // Removed - vendor details will show in main content area instead
+
+  if (comparisonVendorIds.length > 0) {
+    return <VendorComparison selectedVendorIds={comparisonVendorIds} onBack={handleBackToVendors} />;
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      {/* Full-Width Header - Better Height with Subtitle */}
+      <div className="sticky top-0 z-40 bg-white shadow-md border-b border-gray-200 w-full">
+        <div className="w-full px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: SCOPE Logo - Clickable Home Button with Subtitle */}
+            <button 
+              onClick={() => {
+                setView('dashboard');
+                setSelectedVendor(null);
+                setSelectedPillar(null);
+                setSelectedSubItem(null);
+                setUseNewDetailsView(false);
+              }}
+              className="flex items-center space-x-3 hover:scale-105 transition-transform duration-200"
+            >
+              <div className="w-9 h-9 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  SCOPE
+                </span>
+                <span className="text-xs text-gray-500 font-medium">
+                  Supply Chain OSINT & Prediction Engine
+              </span>
+              </div>
+            </button>
+
+            {/* Center: Enhanced Search Bar with Live Results - More Compact */}
+            <div className="flex-1 max-w-xl mx-6">
+              <div className="relative group">
+            <input
+              type="text"
+                  placeholder="Search vendors, sectors, countries..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+          </div>
+                {searchQuery && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors"
+                    >
+                      <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+        </div>
+                )}
+                
+                {/* Live Search Results Dropdown */}
+                {searchQuery && filteredVendors.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-96 overflow-y-auto z-50 animate-slide-up">
+                    <div className="p-3 border-b border-gray-100">
+                      <p className="text-sm text-gray-600">
+                        Found {filteredVendors.length} vendor{filteredVendors.length !== 1 ? 's' : ''}
+                      </p>
+          </div>
+                    {filteredVendors.slice(0, 8).map((vendor, index) => (
+                      <button
+                        key={vendor.name}
+                        onClick={() => {
+                          setSelectedVendor(vendor);
+                          setUseNewDetailsView(true);
+                          setView('vendors');
+                          setSearchQuery('');
+                        }}
+                        className="w-full p-3 text-left hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-b-0 group"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${
+                            (vendor.scores?.aggregate || 0) >= 70 ? 'bg-green-500' :
+                            (vendor.scores?.aggregate || 0) >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}></div>
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                              {vendor.name}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {vendor.sector} • {vendor.country} • Score: {vendor.scores?.aggregate || 0}
+                            </p>
+      </div>
+                          <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+          </div>
+                      </button>
+                    ))}
+                    {filteredVendors.length > 8 && (
+                      <div className="p-3 text-center">
+                        <button
+                          onClick={() => {
+                            setView('vendors');
+                            setSearchQuery('');
+                          }}
+                          className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                        >
+                          View all {filteredVendors.length} results →
+                        </button>
+                      </div>
+                    )}
+      </div>
+                )}
+          </div>
+            </div>
+
+            {/* Right: Enhanced User Profile - Better Sized */}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setShowUserModal(true)}
+                className="flex items-center space-x-2 p-2.5 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:shadow-sm"
+              >
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 rounded-full flex items-center justify-center shadow-md">
+                  <span className="text-white text-sm font-semibold">JS</span>
+          </div>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-gray-900">John Smith</p>
+                  <p className="text-xs text-gray-500">DHKNF Biotech</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+        </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Layout: Sidebar + Content */}
+      <div className="flex">
+        {/* Sidebar - Sticky positioned below header */}
+        <div className="w-56 bg-white shadow-lg border-r border-gray-200 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
       <Sidebar
         view={view}
         setView={setView}
@@ -499,136 +309,352 @@ export default function Dashboard() {
         selectedSubItem={selectedSubItem}
         setSelectedSubItem={setSelectedSubItem}
         setSelectedVendor={setSelectedVendor}
-      />
-      <div className="flex-1 flex flex-col overflow-y-auto">
-        <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input type="text" placeholder="Search vendors, reports..." className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            setUseNewDetailsView={setUseNewDetailsView}
+          />
+        </div>
+        
+        {/* Main Content Area - More Compact */}
+        <div className="flex-1 bg-gray-50 min-h-screen">
+          <div className="p-6 space-y-6">
+            {/* Dashboard View */}
+            {view === 'dashboard' ? (
+              <div className="space-y-8">
+                {/* Quick Stats - Enhanced KPI Cards - More Compact */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {quickStats.map((stat, index) => (
+                    <Card 
+                      key={index} 
+                      className="group hover:scale-105 transition-all duration-300 hover:shadow-lg border-0 bg-gradient-to-br from-white to-gray-50"
+                    >
+                      <div className="flex items-center space-x-3 p-4">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 group-hover:from-blue-100 group-hover:to-indigo-200 transition-all duration-300">
+                          {stat.icon}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-gray-600 mb-1">{stat.label}</p>
+                          <p className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                            {stat.value}
+                          </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3 bg-gray-50 px-4 py-2 rounded-lg">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center"><User className="w-4 h-4 text-white" /></div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">John Smith</div>
-                  <div className="text-xs text-gray-500">Parent Company</div>
+                      {/* Subtle border accent */}
+                      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-indigo-600 rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </Card>
+                  ))}
                 </div>
+
+                {/* Risk Overview - More Compact */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Risk Distribution - Beautiful Donut Chart */}
+                  <Card header={<h3 className="text-base font-semibold text-gray-900">Risk Distribution</h3>}>
+                    <div className="flex items-center justify-center h-36">
+                      <div className="relative w-24 h-24">
+                        {/* Donut Chart */}
+                        <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
+                          {riskDistribution.map((item, index) => {
+                            const total = riskDistribution.reduce((sum, i) => sum + i.count, 0);
+                            const percentage = total > 0 ? (item.count / total) * 100 : 0;
+                            const circumference = 2 * Math.PI * 14; // radius = 14
+                            const strokeDasharray = (percentage / 100) * circumference;
+                            const strokeDashoffset = index === 0 ? 0 : 
+                              riskDistribution.slice(0, index).reduce((sum, i) => {
+                                const p = total > 0 ? (i.count / total) * 100 : 0;
+                                return sum + (p / 100) * circumference;
+                              }, 0);
+                            
+                            const colors = {
+                              'Critical': '#ef4444',
+                              'High': '#f97316', 
+                              'Medium': '#eab308',
+                              'Low': '#22c55e'
+                            };
+                            
+                            return (
+                              <circle
+                                key={index}
+                                cx="16"
+                                cy="16"
+                                r="14"
+                                fill="transparent"
+                                stroke={colors[item.label as keyof typeof colors] || '#6b7280'}
+                                strokeWidth="3"
+                                strokeDasharray={strokeDasharray}
+                                strokeDashoffset={strokeDashoffset}
+                                className="transition-all duration-1000 ease-out"
+                                style={{
+                                  strokeDasharray: strokeDasharray,
+                                  strokeDashoffset: strokeDashoffset
+                                }}
+                              />
+                            );
+                          })}
+                        </svg>
+                        
+                        {/* Center Text */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="text-lg font-bold text-gray-900">
+                            {riskDistribution.reduce((sum, item) => sum + item.count, 0)}
               </div>
-            </div>
+                          <div className="text-xs text-gray-500">Total</div>
           </div>
         </div>
 
-        <div className="flex-1 p-6 space-y-8">
-          {comparisonVendorIds.length > 0 ? (
-            <VendorComparison selectedVendorIds={comparisonVendorIds} onBack={handleBackToVendors} />
-          ) : view === 'dashboard' && !selectedVendor ? (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
-                {quickStats.map((stat) => (
-                  <div key={stat.label} className="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3 space-x-3 min-h-[64px]">
-                    <div>{stat.icon}</div>
+                      {/* Legend */}
+                      <div className="ml-6 space-y-2">
+                        {riskDistribution.map((item, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <div className={`w-3 h-3 rounded-full ${item.color} shadow-sm`}></div>
                     <div>
-                      <div className="text-lg font-bold text-gray-900">{stat.value}</div>
-                      <div className="text-xs text-gray-500 font-medium">{stat.label}</div>
+                              <div className="text-xs font-medium text-gray-900">{item.label}</div>
+                              <div className="text-xs text-gray-500">{item.count}</div>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div className="mb-2">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Risk Overview</h1>
-                <p className="text-gray-600">Monitor your vendor cybersecurity posture across all risk pillars</p>
               </div>
+                  </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
-                {/* Cybersecurity Card */}
-                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer" onClick={() => { setView('intelligence'); setSelectedPillar('Cybersecurity'); setSelectedSubItem(null); }}>
-                  <Card className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-primary-foreground rounded-lg flex items-center justify-center"><Shield className="w-6 h-6 text-primary" /></div>
-                        <span className="text-2xl font-bold text-primary">{dashboardCybersecurity}%</span>
-                      </div>
-                      <h3 className="text-lg font-semibold text-foreground mb-2">Cybersecurity Posture</h3>
-                      <p className="text-sm text-muted-foreground mb-4">External attack surface, technical controls, threat readiness</p>
+                  {/* Risk Trend - Enhanced Chart - More Compact */}
+                  <Card header={<h3 className="text-base font-semibold text-gray-900">Risk Trend</h3>}>
+                    <div className="h-36">
+                      <Line
+                        data={{
+                          ...trendData,
+                          datasets: [{
+                            ...trendData.datasets[0],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#3b82f6',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 8,
+                            pointHoverBackgroundColor: '#3b82f6',
+                            pointHoverBorderColor: '#ffffff',
+                            pointHoverBorderWidth: 3,
+                            fill: true,
+                          }]
+                        }}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                              mode: 'index',
+                              intersect: false,
+                              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                              titleColor: '#ffffff',
+                              bodyColor: '#ffffff',
+                              borderColor: '#3b82f6',
+                              borderWidth: 1,
+                              cornerRadius: 8,
+                              displayColors: false,
+                            },
+                          },
+                          scales: {
+                            x: {
+                              grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                              },
+                              ticks: {
+                                color: '#6b7280',
+                                font: {
+                                  size: 12,
+                                  weight: 'bold',
+                                },
+                              },
+                            },
+                            y: {
+                              beginAtZero: true,
+                              max: 100,
+                              grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                              },
+                              ticks: {
+                                color: '#6b7280',
+                                font: {
+                                  size: 12,
+                                  weight: 'bold',
+                                },
+                                callback: function(value) {
+                                  return value + '%';
+                                },
+                              },
+                            },
+                          },
+                          interaction: {
+                            intersect: false,
+                            mode: 'index',
+                          },
+                          elements: {
+                            point: {
+                              hoverBackgroundColor: '#3b82f6',
+                            },
+                          },
+                        }}
+                      />
                     </div>
-                    <Sparkline data={sparklineData} color="hsl(var(--primary))" />
                   </Card>
                 </div>
 
-                {/* Compliance Pillar */}
-                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer p-6 bg-white rounded-xl shadow-sm border" onClick={() => { setView('intelligence'); setSelectedPillar('Compliance'); setSelectedSubItem(null); }}>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center"><FileText className="w-6 h-6 text-success" /></div>
-                      <span className="text-2xl font-bold text-success">{dashboardCompliance}%</span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">Compliance & Legal</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Standards adherence, regulatory compliance, legal posture</p>
+                {/* Risk Pillars - Enhanced Cards - More Compact */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {pillarGroups.map((pillar, index) => (
+                    <Card 
+                      key={index} 
+                      className="cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-300 group border-0 bg-gradient-to-br from-white to-gray-50"
+                      onClick={() => {
+                        setSelectedPillar(pillar.name);
+                        setView('intelligence');
+                      }}
+                    >
+                      <div className="text-center p-4">
+                        <div className={`w-16 h-16 mx-auto mb-3 rounded-xl flex items-center justify-center ${pillar.color} group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+                          {pillar.icon}
+                        </div>
+                        <h3 className="text-base font-semibold text-gray-900 mb-2">{pillar.name}</h3>
+                        <div className="mb-2">
+                          <p className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                            {Math.round(pillar.avgScore)}
+                          </p>
+                          <p className="text-xs text-gray-500">Average Score</p>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+                          <div 
+                            className={`h-1.5 rounded-full transition-all duration-1000 ease-out ${
+                              pillar.avgScore >= 80 ? 'bg-green-500' :
+                              pillar.avgScore >= 60 ? 'bg-yellow-500' :
+                              pillar.avgScore >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                            }`}
+                            style={{ width: `${pillar.avgScore}%` }}
+                          ></div>
+                        </div>
+                        
+                        {/* Risk Level Indicator */}
+                        <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          pillar.avgScore >= 80 ? 'bg-green-100 text-green-800' :
+                          pillar.avgScore >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                          pillar.avgScore >= 40 ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {pillar.avgScore >= 80 ? 'Low Risk' :
+                           pillar.avgScore >= 60 ? 'Medium Risk' :
+                           pillar.avgScore >= 40 ? 'High Risk' : 'Critical Risk'}
+                        </div>
                   </div>
-                  <Sparkline data={sparklineData} color="hsl(var(--success))" />
+                      
+                      {/* Hover Border Effect */}
+                      <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-blue-200 transition-colors duration-300 pointer-events-none"></div>
+                </Card>
+                  ))}
                 </div>
 
-                {/* Geopolitical Pillar */}
-                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer p-6 bg-white rounded-xl shadow-sm border" onClick={() => { setView('intelligence'); setSelectedPillar('Geopolitical'); setSelectedSubItem(null); }}>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center"><Globe className="w-6 h-6 text-info" /></div>
-                      <span className="text-2xl font-bold text-info">{dashboardGeopolitical}%</span>
+                {/* Enhanced Vendor Risk Heatmap */}
+                <Card header={
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">Vendor Risk Heatmap</h3>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-500">Showing top vendors by risk</span>
+                      <div className="flex space-x-1">
+                        <div className="w-3 h-3 rounded bg-red-500"></div>
+                        <div className="w-3 h-3 rounded bg-yellow-500"></div>
+                        <div className="w-3 h-3 rounded bg-green-500"></div>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">Geopolitical & Sector</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Regional stability, industry risk, infrastructure jurisdiction</p>
                   </div>
-                  <Sparkline data={sparklineData} color="hsl(var(--info))" />
-                </div>
+                }>
+                  <div className="space-y-4">
+                    {/* Risk Legend */}
+                    <div className="flex items-center justify-center space-x-6 text-sm">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 rounded bg-red-500"></div>
+                        <span className="text-gray-600">High Risk (0-50)</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 rounded bg-yellow-500"></div>
+                        <span className="text-gray-600">Medium Risk (51-70)</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 rounded bg-green-500"></div>
+                        <span className="text-gray-600">Low Risk (71-100)</span>
+                      </div>
+                    </div>
+                    
+                    {/* Enhanced Heatmap */}
+                    <HeatmapGrid 
+                      rows={vendors
+                        .sort((a, b) => (a.scores?.aggregate || 0) - (b.scores?.aggregate || 0))
+                        .slice(0, 15)
+                        .map(v => ({
+                          label: v.name,
+                          values: [
+                            v.scores?.cybersecurity || 0,
+                            v.scores?.compliance || 0,
+                            v.scores?.geopolitical || 0,
+                            v.scores?.reputation || 0
+                          ]
+                        }))}
+                      columns={['Cybersecurity', 'Compliance', 'Geopolitical', 'Reputation']}
+                    />
+                    
+                    {/* View All Button */}
+                    <div className="text-center pt-4">
+                      <button
+                        onClick={() => setView('vendors')}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      >
+                        View All {vendors.length} Vendors
+                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </Card>
 
-                {/* Reputation Pillar */}
-                <div className="flex flex-col justify-between min-h-[220px] transition-transform hover:shadow-lg hover:-translate-y-1 cursor-pointer p-6 bg-white rounded-xl shadow-sm border" onClick={() => { setView('intelligence'); setSelectedPillar('Reputation'); setSelectedSubItem(null); }}>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center"><AlertTriangle className="w-6 h-6 text-destructive" /></div>
-                      <span className="text-2xl font-bold text-destructive">{dashboardReputation}%</span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">Reputation & Exposure</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Breach history, credential leaks, brand spoofing</p>
-                  </div>
-                  <Sparkline data={sparklineData} color="hsl(var(--destructive))" />
-                </div>
+                {/* Recent Activity */}
+                <Card header={<h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>}>
+                  <div className="space-y-4">
+                    {recentActivity.map((activity, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        {activity.icon}
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-900">{activity.text}</p>
+                          <p className="text-xs text-gray-500">{activity.time}</p>
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between min-h-[180px]">
-                  <div className="flex items-center space-x-3 mb-4"><LineChart className="w-5 h-5 text-blue-600" /><h2 className="text-lg font-semibold text-gray-900">Risk Trend</h2></div>
-                  <div className="flex-1 flex items-center justify-center"><span className="text-gray-400 text-sm">(Trend chart coming soon)</span></div>
                 </div>
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[180px]">
-                  <div className="flex items-center space-x-3 mb-4"><TrendingUp className="w-5 h-5 text-gray-600" /><h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2></div>
-                  <ul className="divide-y divide-gray-100">
-                    {recentActivity.map((item) => (
-                      <li key={item.text} className="flex items-center py-2 space-x-3">
-                        <div>{item.icon}</div>
-                        <div className="flex-1 text-sm text-gray-700">{item.text}</div>
-                        <div className="text-xs text-gray-400">{item.time}</div>
-                      </li>
                     ))}
-                  </ul>
                 </div>
+                </Card>
               </div>
-            </>
           ) : view === 'vendors' && !selectedVendor ? (
-            <VendorsTable onSelect={handleSelectVendor} />
-          ) : view === 'vendors' && selectedVendor ? (
-            <VendorDetails vendor={selectedVendor} onBack={() => setSelectedVendor(null)} />
+              <VendorsTable
+                onSelect={(vendor) => {
+                  setSelectedVendor(vendor);
+                  setUseNewDetailsView(true);
+                }}
+                vendors={searchQuery ? filteredVendors : vendors}
+                searchQuery={searchQuery}
+              />
+            ) : view === 'vendors' && selectedVendor && useNewDetailsView ? (
+              <NewVendorDetails 
+                vendor={selectedVendor}
+                onBack={() => {
+                  setSelectedVendor(null);
+                  setUseNewDetailsView(false);
+                }} 
+              />
           ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && !selectedSubItem ? (
             <CybersecurityHome
               avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.cybersecurity || 0), 0) / vendors.length)}
               vendorCount={vendors.length}
               highRiskCount={vendors.filter(v => (v.scores?.cybersecurity || 0) < 50).length}
               patchCompliance={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.cybersecurity || 0), 0) / vendors.length)}
-              subcategoryScores={pillarGroups[0].keys.map(key => ({
+                subcategoryScores={pillarGroups[0].keys.map(key => ({
                 name: key,
                 avg: Math.round(vendors.reduce((sum, v) => {
                   const item = v.scoreDetails.find(i => i.category === key);
@@ -636,17 +662,25 @@ export default function Dashboard() {
                 }, 0) / vendors.length)
               }))}
             />
-          ) :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Vulnerabilities' ? <VulnerabilitiesTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Attack Surface' ? <AttackSurfaceTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Web/App Security' ? <WebAppSecurityTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Cloud & Infra' ? <CloudInfraTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Email Security' ? <EmailSecurityTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Code Repo Exposure' ? <CodeRepoExposureTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Endpoint Hygiene' ? <EndpointHygieneTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'IOC & Infra Threat' ? <IOCInfraThreatTable /> :
-          view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Detection & Response' ? <DetectionResponseTable /> :
-          view === 'intelligence' && selectedPillar === 'Compliance' && !selectedSubItem ? (
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Vulnerabilities' ? (
+              <VulnerabilitiesTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Attack Surface' ? (
+              <AttackSurfaceTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Web/App Security' ? (
+              <WebAppSecurityTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Cloud & Infra' ? (
+              <CloudInfraTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Email Security' ? (
+              <EmailSecurityTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Code Repo Exposure' ? (
+              <CodeRepoExposureTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Endpoint Hygiene' ? (
+              <EndpointHygieneTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'IOC & Infra Threat' ? (
+              <IOCInfraThreatTable />
+            ) : view === 'intelligence' && selectedPillar === 'Cybersecurity' && selectedSubItem === 'Detection & Response' ? (
+              <DetectionResponseTable />
+            ) : view === 'intelligence' && selectedPillar === 'Compliance' && !selectedSubItem ? (
              <ComplianceHome
               avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.compliance || 0), 0) / vendors.length)}
               vendorCount={vendors.length}
@@ -659,13 +693,17 @@ export default function Dashboard() {
                 }, 0) / vendors.length)
               }))}
             />
-          ) :
-          view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Certifications' ? <CertificationsTable /> :
-          view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Questionnaire Results' ? <QuestionnaireResultsTable /> :
-          view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Regulatory Violations' ? <RegulatoryViolationsTable /> :
-          view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Privacy Compliance' ? <PrivacyComplianceTable /> :
-          view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Contractual Clauses' ? <ContractualClausesTable /> :
-          view === 'intelligence' && selectedPillar === 'Geopolitical' && !selectedSubItem ? (
+            ) : view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Certifications' ? (
+              <CertificationsTable />
+            ) : view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Questionnaire Results' ? (
+              <QuestionnaireResultsTable />
+            ) : view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Regulatory Violations' ? (
+              <RegulatoryViolationsTable />
+            ) : view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Privacy Compliance' ? (
+              <PrivacyComplianceTable />
+            ) : view === 'intelligence' && selectedPillar === 'Compliance' && selectedSubItem === 'Contractual Clauses' ? (
+              <ContractualClausesTable />
+            ) : view === 'intelligence' && selectedPillar === 'Geopolitical' && !selectedSubItem ? (
              <GeopoliticalHome
               avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.geopolitical || 0), 0) / vendors.length)}
               vendorCount={vendors.length}
@@ -678,14 +716,19 @@ export default function Dashboard() {
                 }, 0) / vendors.length)
               }))}
             />
-          ) :
-          view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Country Risk' ? <CountryRiskTable /> :
-          view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Sector Risk' ? <SectorRiskTable /> :
-          view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Company Size' ? <CompanySizeTable /> :
-          view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Infra Jurisdiction' ? <InfraJurisdictionTable /> :
-          view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Concentration Risk' ? <ConcentrationRiskTable /> :
-          view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Environmental Exposure' ? <EnvironmentalExposureTable /> :
-          view === 'intelligence' && selectedPillar === 'Reputation' && !selectedSubItem ? (
+            ) : view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Country Risk' ? (
+              <CountryRiskTable />
+            ) : view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Sector Risk' ? (
+              <SectorRiskTable />
+            ) : view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Company Size' ? (
+              <CompanySizeTable />
+            ) : view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Infra Jurisdiction' ? (
+              <InfraJurisdictionTable />
+            ) : view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Concentration Risk' ? (
+              <ConcentrationRiskTable />
+            ) : view === 'intelligence' && selectedPillar === 'Geopolitical' && selectedSubItem === 'Environmental Exposure' ? (
+              <EnvironmentalExposureTable />
+            ) : view === 'intelligence' && selectedPillar === 'Reputation' && !selectedSubItem ? (
             <ReputationHome
               avgScore={Math.round(vendors.reduce((sum, v) => sum + (v.scores?.reputation || 0), 0) / vendors.length)}
               vendorCount={vendors.length}
@@ -698,172 +741,79 @@ export default function Dashboard() {
                 }, 0) / vendors.length)
               }))}
             />
-          ) :
-          view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Data Breach History' ? <DataBreachHistoryTable /> :
-          view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Credential/Data Leaks' ? <CredentialDataLeaksTable /> :
-          view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Brand Spoofing' ? <BrandSpoofingTable /> :
-          view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Dark Web Presence' ? <DarkWebPresenceTable /> :
-          view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Social Sentiment' ? <SocialSentimentTable /> :
-          view === 'reports' ? (
-            <ReportsTable />
+            ) : view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Data Breach History' ? (
+              <DataBreachHistoryTable />
+            ) : view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Credential/Data Leaks' ? (
+              <CredentialDataLeaksTable />
+            ) : view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Brand Spoofing' ? (
+              <BrandSpoofingTable />
+            ) : view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Dark Web Presence' ? (
+              <DarkWebPresenceTable />
+            ) : view === 'intelligence' && selectedPillar === 'Reputation' && selectedSubItem === 'Social Sentiment' ? (
+              <SocialSentimentTable />
+            ) : view === 'reports' ? (
+              <div className="p-8 text-center text-gray-500">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <h2 className="text-xl font-semibold mb-2">Reports Coming Soon</h2>
+                <p>Advanced reporting and analytics features will be available in the next update.</p>
+              </div>
+            ) : view === 'cortex' ? (
+              <CortexEngine />
+            ) : view === 'add-vendor' ? (
+              <AddVendor onBack={() => setView('vendors')} />
           ) : null}
         </div>
       </div>
     </div>
-  )
-}
 
-function ReportsTable() {
-  const [showModal, setShowModal] = useState(false);
-  const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [vendorFilter, setVendorFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-
-  const reports = [
-    { name: 'Acme Q2 Risk', type: 'Risk', vendor: 'Acme Corp', date: '2024-06-10', status: 'Completed' },
-    { name: 'CyberSafe Compliance', type: 'Compliance', vendor: 'CyberSafe', date: '2024-06-09', status: 'In Progress' },
-    { name: 'D Pharma Geopolitical', type: 'Geopolitical', vendor: 'D Pharma', date: '2024-06-08', status: 'Completed' },
-    { name: 'DataVault Reputation', type: 'Reputation', vendor: 'DataVault', date: '2024-06-07', status: 'Completed' },
-  ];
-
-  const filteredReports = reports.filter(r =>
-    (!search || r.name.toLowerCase().includes(search.toLowerCase())) &&
-    (!typeFilter || r.type === typeFilter) &&
-    (!vendorFilter || r.vendor === vendorFilter) &&
-    (!statusFilter || r.status === statusFilter) &&
-    (!dateFilter || r.date === dateFilter)
-  );
-
-  return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
-          <FileText className="w-6 h-6 text-blue-600" />
-          <span>Reports</span>
-        </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create New Report</span>
-        </button>
-      </div>
-      <div className="flex flex-wrap gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search reports..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-48"
-        />
-        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
-          <option value="">All Types</option>
-          <option value="Risk">Risk</option>
-          <option value="Compliance">Compliance</option>
-          <option value="Geopolitical">Geopolitical</option>
-          <option value="Reputation">Reputation</option>
-        </select>
-        <select value={vendorFilter} onChange={e => setVendorFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
-          <option value="">All Vendors</option>
-          <option value="Acme Corp">Acme Corp</option>
-          <option value="CyberSafe">CyberSafe</option>
-          <option value="D Pharma">D Pharma</option>
-          <option value="DataVault">DataVault</option>
-        </select>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg">
-          <option value="">All Statuses</option>
-          <option value="Completed">Completed</option>
-          <option value="In Progress">In Progress</option>
-        </select>
-        <input
-          type="date"
-          value={dateFilter}
-          onChange={e => setDateFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg"
-        />
-      </div>
-      <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-100">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Report Name</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vendor</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {filteredReports.map((report) => (
-              <tr key={report.name} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{report.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{report.type}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{report.vendor}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-700">{report.date}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${report.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{report.status}</span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                  <button className="text-blue-600 hover:underline text-sm">View</button>
-                  <button className="text-gray-600 hover:underline text-sm">Download</button>
-                  <button className="text-red-600 hover:underline text-sm">Delete</button>
-                </td>
-              </tr>
-            ))}
-            {filteredReports.length === 0 && (
-              <tr><td colSpan={6} className="text-center text-gray-400 py-8">No reports found.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 p-4">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <FileText className="w-6 h-6 text-blue-600" />
-                <h2 className="text-xl font-bold text-gray-900">Create New Report</h2>
+      {/* Enhanced User Modal - More Compact - Positioned Below Profile */}
+      {showUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 animate-fade-in" onClick={() => setShowUserModal(false)}>
+          <div className="absolute top-22 right-4 bg-white rounded-xl p-6 w-80 shadow-xl animate-slide-up border border-gray-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-500 rounded-full flex items-center justify-center shadow-md">
+                <span className="text-white text-sm font-semibold">JS</span>
               </div>
-              <button className="text-gray-400 hover:text-gray-600" onClick={() => setShowModal(false)}>
-                <X className="w-6 h-6" />
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">John Smith</h3>
+                <p className="text-sm text-gray-500">DHKNF Biotech</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 mb-4">
+              <button className="w-full text-left p-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 border border-transparent hover:border-blue-200 group">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Settings</span>
+                  <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+              </button>
+              <button className="w-full text-left p-3 rounded-lg hover:bg-green-50 hover:text-green-600 transition-all duration-200 border border-transparent hover:border-green-200 group">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Change Portfolio</span>
+                  <svg className="w-4 h-4 text-gray-400 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                  </svg>
+                </div>
+              </button>
+              <button className="w-full text-left p-3 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200 border border-transparent hover:border-red-200 group">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Logout</span>
+                  <svg className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </div>
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Report Name</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Enter report name" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                  <option>Risk</option>
-                  <option>Compliance</option>
-                  <option>Geopolitical</option>
-                  <option>Reputation</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Vendor</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                  <option>Acme Corp</option>
-                  <option>CyberSafe</option>
-                  <option>D Pharma</option>
-                  <option>DataVault</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 p-6 border-t border-gray-200">
-              <button className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Create</button>
-            </div>
+            
+            <button
+              onClick={() => setShowUserModal(false)}
+              className="w-full p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 text-sm font-medium"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

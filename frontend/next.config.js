@@ -1,20 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Performance optimizations
-  experimental: {
-    optimizeCss: false,
-    optimizePackageImports: ['lucide-react'],
-  },
-  
-  // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
   },
-  
-  // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-}
+  devIndicators: {
+    buildActivity: false,
+    buildActivityPosition: 'bottom-right',
+  },
+};
 
 module.exports = nextConfig 

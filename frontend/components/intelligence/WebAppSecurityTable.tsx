@@ -1,5 +1,6 @@
 // frontend/components/intelligence/WebAppSecurityTable.tsx
 import DataTable from '../ui/DataTable';
+import Badge from '../ui/Badge';
 import { ColumnDef } from '../../types';
 
 type AppSecurityIssue = {
@@ -30,11 +31,8 @@ const columns: ColumnDef<AppSecurityIssue>[] = [
     header: 'Severity',
     cell: (row) => {
       const severity = row.severity;
-      const color =
-        severity === 'High' ? 'text-red-700' :
-        severity === 'Medium' ? 'text-orange-700' :
-        'text-yellow-700';
-      return <span className={`font-semibold ${color}`}>{severity}</span>;
+      const tone = severity === 'High' ? 'red' : severity === 'Medium' ? 'orange' : 'yellow';
+      return <Badge tone={tone}>{severity}</Badge>;
     },
   },
   {

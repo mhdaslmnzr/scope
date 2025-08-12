@@ -1,0 +1,700 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { 
+  Brain, Calculator, BarChart3, TrendingUp, Shield, FileText, Globe, AlertTriangle,
+  Sliders, Play, RotateCcw, Download, Copy, Zap, Activity, Target, Settings
+} from 'lucide-react';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { vendors, riskColor, criticalityColors } from '../mock-data';
+import Card from './ui/Card';
+import Skeleton from './ui/Skeleton';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
+
+// Mock pillar groups for calculations
+const pillarGroups = [
+  { 
+    name: 'Cybersecurity', 
+    weight: 0.35,
+    keys: ['attack_surface', 'vulnerabilities', 'endpoint_hygiene', 'email_security', 'web_app_security', 'detection_response'],
+    color: '#3B82F6',
+    description: 'External attack surface, vulnerability management, endpoint protection'
+  },
+  { 
+    name: 'Compliance', 
+    weight: 0.25,
+    keys: ['certifications', 'privacy_compliance', 'contractual_clauses'],
+    color: '#10B981',
+    description: 'Regulatory compliance, certifications, contractual obligations'
+  },
+  { 
+    name: 'Geopolitical', 
+    weight: 0.20,
+    keys: ['country_risk', 'sector_risk', 'infra_jurisdiction'],
+    color: '#8B5CF6',
+    description: 'Geographic and political risk factors'
+  },
+  { 
+    name: 'Reputation', 
+    weight: 0.20,
+    keys: ['data_breach_history', 'dark_web_presence', 'social_sentiment', 'credential_leaks'],
+    color: '#EF4444',
+    description: 'Historical breaches, public sentiment, data leaks'
+  }
+];
+
+export default function CortexEngine() {
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [simulatorMode, setSimulatorMode] = useState(false);
+  
+  // Independent simulator state - not tied to vendors
+  const [simulatedCriticality, setSimulatedCriticality] = useState('Medium');
+  const [simulatedScores, setSimulatedScores] = useState([
+    // Cybersecurity Components
+    { category: 'Vulnerability Management', score: 75, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'Attack Surface', score: 65, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'Web/App Security', score: 80, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'Cloud & Infra', score: 70, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'Email Security', score: 85, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'Endpoint Hygiene', score: 60, weight: 5, pillar: 'Cybersecurity' },
+    { category: 'Detection & Response', score: 70, weight: 2, pillar: 'Cybersecurity' },
+    
+    // Compliance Components
+    { category: 'Certifications', score: 90, weight: 6, pillar: 'Compliance' },
+    { category: 'Privacy Compliance', score: 85, weight: 2, pillar: 'Compliance' },
+    { category: 'Contractual Clauses', score: 75, weight: 2, pillar: 'Compliance' },
+    { category: 'Regulatory Violations', score: 95, weight: 5, pillar: 'Compliance' },
+    
+    // Geopolitical Components
+    { category: 'Country Risk', score: 80, weight: 6, pillar: 'Geopolitical' },
+    { category: 'Sector Risk', score: 70, weight: 4, pillar: 'Geopolitical' },
+    { category: 'Infra Jurisdiction', score: 85, weight: 3, pillar: 'Geopolitical' },
+    { category: 'Concentration Risk', score: 60, weight: 2, pillar: 'Geopolitical' },
+    
+    // Reputation Components
+    { category: 'Data Breach History', score: 90, weight: 6, pillar: 'Reputation' },
+    { category: 'Credential/Data Leaks', score: 85, weight: 5, pillar: 'Reputation' },
+    { category: 'Dark Web Presence', score: 95, weight: 3, pillar: 'Reputation' },
+    { category: 'Social Sentiment', score: 80, weight: 3, pillar: 'Reputation' },
+  ]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Calculate pillar score from individual components by pillar name
+  const calculatePillarScore = (scoreDetails: any[], pillarName: string) => {
+    const relevantScores = scoreDetails.filter(item => item.pillar === pillarName);
+    if (relevantScores.length === 0) return 0;
+    
+    const weightedSum = relevantScores.reduce((sum, item) => sum + (item.score * item.weight), 0);
+    const totalWeight = relevantScores.reduce((sum, item) => sum + item.weight, 0);
+    
+    return Math.round(weightedSum / totalWeight);
+  };
+
+  // Calculate aggregate score
+  const calculateAggregateScore = (pillarScores: any[], criticality: string) => {
+    const weightedSum = pillarScores.reduce((sum, pillar) => sum + (pillar.score * pillar.weight), 0);
+    const criticalityMultiplier = criticality === 'Critical' ? 0.9 : criticality === 'High' ? 0.95 : 1.0;
+    
+    return Math.round(weightedSum * criticalityMultiplier);
+  };
+
+  // Calculate breach probability
+  const calculateBreachProbability = (aggregateScore: number, criticality: string) => {
+    const baseRisk = (100 - aggregateScore) / 100;
+    const criticalityFactor = criticality === 'Critical' ? 1.5 : criticality === 'High' ? 1.2 : 1.0;
+    
+    return Math.min(baseRisk * criticalityFactor, 0.95);
+  };
+
+  // Simulate score changes
+  const handleScoreChange = (category: string, newScore: number) => {
+    setSimulatedScores(prev => 
+      prev.map(item => 
+        item.category === category ? { ...item, score: newScore } : item
+      )
+    );
+  };
+
+  // Calculate current simulated results
+  const currentPillarScores = pillarGroups.map(pillar => ({
+    ...pillar,
+    score: calculatePillarScore(simulatedScores, pillar.name)
+  }));
+
+  const currentAggregateScore = calculateAggregateScore(currentPillarScores, simulatedCriticality);
+  const currentBreachProbability = calculateBreachProbability(currentAggregateScore, simulatedCriticality);
+
+  // Reset simulator to default values
+  const resetSimulator = () => {
+    setSimulatedScores([
+      // Cybersecurity Components
+      { category: 'Vulnerability Management', score: 75, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'Attack Surface', score: 65, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'Web/App Security', score: 80, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'Cloud & Infra', score: 70, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'Email Security', score: 85, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'Endpoint Hygiene', score: 60, weight: 5, pillar: 'Cybersecurity' },
+      { category: 'Detection & Response', score: 70, weight: 2, pillar: 'Cybersecurity' },
+      
+      // Compliance Components
+      { category: 'Certifications', score: 90, weight: 6, pillar: 'Compliance' },
+      { category: 'Privacy Compliance', score: 85, weight: 2, pillar: 'Compliance' },
+      { category: 'Contractual Clauses', score: 75, weight: 2, pillar: 'Compliance' },
+      { category: 'Regulatory Violations', score: 95, weight: 5, pillar: 'Compliance' },
+      
+      // Geopolitical Components
+      { category: 'Country Risk', score: 80, weight: 6, pillar: 'Geopolitical' },
+      { category: 'Sector Risk', score: 70, weight: 4, pillar: 'Geopolitical' },
+      { category: 'Infra Jurisdiction', score: 85, weight: 3, pillar: 'Geopolitical' },
+      { category: 'Concentration Risk', score: 60, weight: 2, pillar: 'Geopolitical' },
+      
+      // Reputation Components
+      { category: 'Data Breach History', score: 90, weight: 6, pillar: 'Reputation' },
+      { category: 'Credential/Data Leaks', score: 85, weight: 5, pillar: 'Reputation' },
+      { category: 'Dark Web Presence', score: 95, weight: 3, pillar: 'Reputation' },
+      { category: 'Social Sentiment', score: 80, weight: 3, pillar: 'Reputation' },
+    ]);
+    setSimulatedCriticality('Medium');
+  };
+
+  // Chart configurations
+  const algorithmFlowData = {
+    labels: ['Data Collection', 'Score Calculation', 'Weight Application', 'Criticality Adjustment', 'Final Score'],
+    datasets: [{
+      label: 'Processing Time (ms)',
+      data: [150, 85, 45, 30, 20],
+      backgroundColor: '#3B82F6',
+      borderColor: '#2563EB',
+      borderWidth: 1
+    }]
+  };
+
+  const pillarWeightData = {
+    labels: pillarGroups.map(p => p.name),
+    datasets: [{
+      data: pillarGroups.map(p => p.weight * 100),
+      backgroundColor: pillarGroups.map(p => p.color),
+      borderWidth: 0
+    }]
+  };
+
+  const scoreDistributionData = {
+    labels: ['0-25 (Critical)', '26-50 (High Risk)', '51-75 (Medium Risk)', '76-100 (Low Risk)'],
+    datasets: [{
+      label: 'Vendor Count',
+      data: [
+        vendors.filter(v => v.scores.aggregate <= 25).length,
+        vendors.filter(v => v.scores.aggregate > 25 && v.scores.aggregate <= 50).length,
+        vendors.filter(v => v.scores.aggregate > 50 && v.scores.aggregate <= 75).length,
+        vendors.filter(v => v.scores.aggregate > 75).length,
+      ],
+      backgroundColor: ['#EF4444', '#F59E0B', '#F97316', '#10B981']
+    }]
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <Skeleton className="h-16 w-full" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <Brain className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Cortex Scoring Engine</h1>
+            <p className="text-gray-600">Advanced risk calculation and simulation platform</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+            <Zap className="w-4 h-4" />
+            Online
+          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <Download className="w-4 h-4" />
+            Export Config
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="flex space-x-8">
+          {[
+            { id: 'overview', label: 'Overview', icon: <BarChart3 className="w-4 h-4" /> },
+            { id: 'algorithm', label: 'Algorithm', icon: <Calculator className="w-4 h-4" /> },
+            { id: 'simulator', label: 'Score Simulator', icon: <Sliders className="w-4 h-4" /> },
+            { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-4 h-4" /> }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-3 py-3 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === tab.id
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Key Metrics */}
+          <Card className="col-span-1">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Engine Stats</h3>
+              <Activity className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Vendors</span>
+                <span className="font-semibold">{vendors.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Active Pillars</span>
+                <span className="font-semibold">{pillarGroups.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Score Components</span>
+                <span className="font-semibold">{simulatedScores.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Avg Processing Time</span>
+                <span className="font-semibold text-green-600">330ms</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Engine Version</span>
+                <span className="font-semibold">v2.1.0</span>
+              </div>
+            </div>
+          </Card>
+
+          {/* Pillar Weights */}
+          <Card className="col-span-1">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Pillar Weights</h3>
+              <Settings className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="h-48">
+              <Doughnut 
+                data={pillarWeightData} 
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom' as const,
+                      labels: { usePointStyle: true, padding: 15 }
+                    }
+                  }
+                }}
+              />
+            </div>
+          </Card>
+
+          {/* Score Distribution */}
+          <Card className="col-span-1">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Risk Distribution</h3>
+              <Target className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="h-48">
+              <Bar 
+                data={scoreDistributionData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                  }
+                }}
+              />
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'algorithm' && (
+        <div className="space-y-6">
+          {/* Algorithm Flow */}
+          <Card>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Scoring Algorithm Flow</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2">1. Data Collection</h4>
+                  <p className="text-blue-700 text-sm">Gather intelligence data from multiple sources including OSINT, vulnerability scanners, and compliance databases.</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-green-900 mb-2">2. Component Scoring</h4>
+                  <p className="text-green-700 text-sm">Calculate individual scores for each component using weighted algorithms and normalization techniques.</p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-purple-900 mb-2">3. Pillar Aggregation</h4>
+                  <p className="text-purple-700 text-sm">Combine component scores into pillar scores using predefined weights and decay functions.</p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-orange-900 mb-2">4. Final Calculation</h4>
+                  <p className="text-orange-700 text-sm">Apply criticality multipliers and calculate final aggregate score with breach probability.</p>
+                </div>
+              </div>
+              <div className="h-64">
+                <Bar data={algorithmFlowData} options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } }
+                }} />
+              </div>
+            </div>
+          </Card>
+
+          {/* Detailed Formulas */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Pillar Score Formula</h3>
+              <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                <div>pillarScore = Σ(componentScore × weight) / Σ(weight)</div>
+                <div className="mt-2 text-gray-400">// Weighted average of components</div>
+                <div className="mt-4">where:</div>
+                <div>• componentScore ∈ [0, 100]</div>
+                <div>• weight ∈ [0.1, 1.0]</div>
+              </div>
+            </Card>
+
+            <Card>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Aggregate Score Formula</h3>
+              <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                <div>aggregateScore = (Σ(pillarScore × pillarWeight) × criticalityMultiplier)</div>
+                <div className="mt-2 text-gray-400">// Weighted sum with criticality adjustment</div>
+                <div className="mt-4">criticalityMultiplier:</div>
+                <div>• Critical: 0.90</div>
+                <div>• High: 0.95</div>
+                <div>• Medium/Low: 1.00</div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'simulator' && (
+        <div className="space-y-6">
+          {/* Simulator Controls */}
+          <Card>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Score Simulator</h3>
+                <p className="text-gray-600">Interactive demonstration of how component scores affect overall risk calculations</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Preset Scenarios:</label>
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value === 'reset') {
+                        resetSimulator();
+                      } else if (e.target.value === 'high-risk') {
+                        setSimulatedScores(prev => prev.map(item => ({...item, score: Math.floor(Math.random() * 30) + 10})));
+                        setSimulatedCriticality('Critical');
+                      } else if (e.target.value === 'low-risk') {
+                        setSimulatedScores(prev => prev.map(item => ({...item, score: Math.floor(Math.random() * 20) + 80})));
+                        setSimulatedCriticality('Low');
+                      }
+                      e.target.value = '';
+                    }}
+                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm"
+                    defaultValue=""
+                  >
+                    <option value="">Choose scenario</option>
+                    <option value="reset">Balanced (Default)</option>
+                    <option value="high-risk">High Risk Vendor</option>
+                    <option value="low-risk">Low Risk Vendor</option>
+                  </select>
+                </div>
+                <button
+                  onClick={resetSimulator}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset
+                </button>
+                <div className="px-3 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
+                  Demo Mode
+                </div>
+              </div>
+            </div>
+
+            {/* Current Results */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-blue-600">{currentAggregateScore}</div>
+                <div className="text-sm text-blue-800">Aggregate Score</div>
+              </div>
+              <div className="bg-red-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-red-600">{Math.round(currentBreachProbability * 100)}%</div>
+                <div className="text-sm text-red-800">Breach Probability</div>
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg text-center">
+                <div className="text-lg font-bold text-purple-600">{simulatedCriticality}</div>
+                <div className="text-sm text-purple-800">Criticality Level</div>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg text-center">
+                <div className="text-lg font-bold text-green-600">{riskColor(currentAggregateScore).includes('green') ? 'Low' : riskColor(currentAggregateScore).includes('yellow') ? 'Medium' : riskColor(currentAggregateScore).includes('red') ? 'High' : 'Critical'}</div>
+                <div className="text-sm text-green-800">Risk Level</div>
+              </div>
+            </div>
+
+            {/* Criticality Selector */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Criticality Level</label>
+              <select
+                value={simulatedCriticality}
+                onChange={(e) => setSimulatedCriticality(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+
+            {/* Score Adjusters - Organized by Pillar */}
+            <div className="space-y-6">
+              <h4 className="font-semibold text-gray-900">Component Scores by Risk Pillar</h4>
+              
+              {pillarGroups.map((pillar) => (
+                <div key={pillar.name} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    {pillar.name === 'Cybersecurity' && <Shield className="w-4 h-4 text-blue-600" />}
+                    {pillar.name === 'Compliance' && <FileText className="w-4 h-4 text-green-600" />}
+                    {pillar.name === 'Geopolitical' && <Globe className="w-4 h-4 text-purple-600" />}
+                    {pillar.name === 'Reputation' && <AlertTriangle className="w-4 h-4 text-red-600" />}
+                    <h5 className="font-medium text-gray-800">{pillar.name}</h5>
+                    <span className="text-xs text-gray-500">({pillar.description})</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 pl-6">
+                    {simulatedScores
+                      .filter(item => item.pillar === pillar.name)
+                      .map((item: any) => (
+                        <div key={item.category} className="bg-gray-50 p-3 rounded-lg">
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-sm font-medium text-gray-700">{item.category}</label>
+                            <span className="text-sm font-bold text-gray-900">{item.score}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            value={item.score}
+                            onChange={(e) => handleScoreChange(item.category, parseInt(e.target.value))}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                          />
+                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0</span>
+                            <span>Weight: {item.weight}</span>
+                            <span>100</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Pillar Breakdown */}
+          <Card>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Pillar Breakdown</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {currentPillarScores.map((pillar) => (
+                <div key={pillar.name} className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    {pillar.name === 'Cybersecurity' && <Shield className="w-4 h-4 text-blue-600" />}
+                    {pillar.name === 'Compliance' && <FileText className="w-4 h-4 text-green-600" />}
+                    {pillar.name === 'Geopolitical' && <Globe className="w-4 h-4 text-purple-600" />}
+                    {pillar.name === 'Reputation' && <AlertTriangle className="w-4 h-4 text-red-600" />}
+                    <span className="font-medium text-gray-900">{pillar.name}</span>
+                  </div>
+                  <div className="text-2xl font-bold mb-1" style={{ color: pillar.color }}>
+                    {pillar.score}
+                  </div>
+                  <div className="text-xs text-gray-600 mb-2">Weight: {(pillar.weight * 100)}%</div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="h-2 rounded-full transition-all duration-300" 
+                      style={{ 
+                        width: `${pillar.score}%`, 
+                        backgroundColor: pillar.color 
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div className="space-y-6">
+          {/* Performance Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Processing Performance</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Avg Response Time</span>
+                  <span className="font-semibold text-green-600">330ms</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Cache Hit Rate</span>
+                  <span className="font-semibold text-blue-600">94.2%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Error Rate</span>
+                  <span className="font-semibold text-green-600">0.01%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Uptime</span>
+                  <span className="font-semibold text-green-600">99.9%</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Quality</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Completeness</span>
+                  <span className="font-semibold text-green-600">98.5%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Freshness</span>
+                  <span className="font-semibold text-blue-600">97.2%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Accuracy</span>
+                  <span className="font-semibold text-green-600">96.8%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Source Reliability</span>
+                  <span className="font-semibold text-green-600">95.1%</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Risk Insights</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">High Risk Vendors</span>
+                  <span className="font-semibold text-red-600">{vendors.filter(v => v.scores.aggregate < 50).length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Critical Assets</span>
+                  <span className="font-semibold text-orange-600">{vendors.filter(v => v.criticality === 'Critical').length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Improving Trends</span>
+                  <span className="font-semibold text-green-600">{Math.floor(vendors.length * 0.6)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Avg Breach Risk</span>
+                  <span className="font-semibold text-yellow-600">{Math.round(vendors.reduce((sum, v) => sum + (v.breachChance || 0), 0) / vendors.length * 100)}%</span>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Score Trends */}
+          <Card>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Score Evolution Over Time</h3>
+            <div className="h-64">
+              <Line
+                data={{
+                  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                  datasets: [
+                    {
+                      label: 'Average Aggregate Score',
+                      data: [65, 67, 69, 66, 71, 73],
+                      borderColor: '#3B82F6',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      tension: 0.4
+                    },
+                    {
+                      label: 'Cybersecurity Average',
+                      data: [68, 70, 72, 69, 74, 76],
+                      borderColor: '#10B981',
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                      tension: 0.4
+                    }
+                  ]
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: 'top' }
+                  },
+                  scales: {
+                    y: { min: 50, max: 80 }
+                  }
+                }}
+              />
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}

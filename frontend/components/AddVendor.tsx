@@ -1,0 +1,506 @@
+'use client';
+
+import { useState } from 'react';
+import { ArrowLeft, ArrowRight, Save, Upload, CheckCircle, Plus, Building, MapPin, Users, Globe, Shield, FileText } from 'lucide-react';
+import Card from './ui/Card';
+
+interface FormData {
+  // Basic Information
+  vendorName: string;
+  website: string;
+  industry: string;
+  country: string;
+  
+  // Business Details
+  employeeCount: string;
+  annualRevenue: string;
+  globalFootprint: string;
+  dataCenterRegion: string;
+  
+  // Risk Assessment
+  assetImportance: string;
+  vendorFunction: string;
+  internalDependencies: string;
+  
+  // Security Information
+  certifications: string;
+  frameworks: string;
+  edrAv: boolean;
+  mdmByod: boolean;
+  incidentResponsePlan: boolean;
+  
+  // Technical Details
+  publicIp: string;
+  subdomains: string;
+  githubOrg: string;
+}
+
+const initialFormData: FormData = {
+  vendorName: '',
+  website: '',
+  industry: '',
+  country: '',
+  employeeCount: '',
+  annualRevenue: '',
+  globalFootprint: '',
+  dataCenterRegion: '',
+  assetImportance: '',
+  vendorFunction: '',
+  internalDependencies: '',
+  certifications: '',
+  frameworks: '',
+  edrAv: false,
+  mdmByod: false,
+  incidentResponsePlan: false,
+  publicIp: '',
+  subdomains: '',
+  githubOrg: '',
+};
+
+const steps = [
+  { id: 1, title: 'Basic Information', icon: <Building className="w-5 h-5" /> },
+  { id: 2, title: 'Business Details', icon: <Users className="w-5 h-5" /> },
+  { id: 3, title: 'Risk Assessment', icon: <Shield className="w-5 h-5" /> },
+  { id: 4, title: 'Security Information', icon: <FileText className="w-5 h-5" /> },
+  { id: 5, title: 'Technical Details', icon: <Globe className="w-5 h-5" /> },
+  { id: 6, title: 'Review & Submit', icon: <CheckCircle className="w-5 h-5" /> },
+];
+
+export default function AddVendor({ onBack }: { onBack: () => void }) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const updateFormData = (field: keyof FormData, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const nextStep = () => {
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    alert('Vendor added successfully!');
+    setIsSubmitting(false);
+    onBack();
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Vendor Name *</label>
+                <input
+                  type="text"
+                  value={formData.vendorName}
+                  onChange={(e) => updateFormData('vendorName', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter vendor name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                <input
+                  type="url"
+                  value={formData.website}
+                  onChange={(e) => updateFormData('website', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="https://vendor.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Industry *</label>
+                <select
+                  value={formData.industry}
+                  onChange={(e) => updateFormData('industry', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select industry</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Education">Education</option>
+                  <option value="Government">Government</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Country *</label>
+                <select
+                  value={formData.country}
+                  onChange={(e) => updateFormData('country', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select country</option>
+                  <option value="USA">United States</option>
+                  <option value="UK">United Kingdom</option>
+                  <option value="Canada">Canada</option>
+                  <option value="Germany">Germany</option>
+                  <option value="France">France</option>
+                  <option value="Netherlands">Netherlands</option>
+                  <option value="Singapore">Singapore</option>
+                  <option value="Australia">Australia</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Employee Count</label>
+                <select
+                  value={formData.employeeCount}
+                  onChange={(e) => updateFormData('employeeCount', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select size</option>
+                  <option value="1-10">1-10</option>
+                  <option value="11-50">11-50</option>
+                  <option value="51-200">51-200</option>
+                  <option value="201-1000">201-1000</option>
+                  <option value="1001-5000">1001-5000</option>
+                  <option value="5000+">5000+</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Annual Revenue</label>
+                <select
+                  value={formData.annualRevenue}
+                  onChange={(e) => updateFormData('annualRevenue', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select revenue</option>
+                  <option value="<1M">Less than $1M</option>
+                  <option value="1M-10M">$1M - $10M</option>
+                  <option value="10M-100M">$10M - $100M</option>
+                  <option value="100M-1B">$100M - $1B</option>
+                  <option value="1B+">$1B+</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Global Footprint</label>
+                <input
+                  type="text"
+                  value={formData.globalFootprint}
+                  onChange={(e) => updateFormData('globalFootprint', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., North America, Europe"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Data Center Region</label>
+                <input
+                  type="text"
+                  value={formData.dataCenterRegion}
+                  onChange={(e) => updateFormData('dataCenterRegion', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., US East, EU Central"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Asset Importance *</label>
+                <select
+                  value={formData.assetImportance}
+                  onChange={(e) => updateFormData('assetImportance', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select importance</option>
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Vendor Function</label>
+                <input
+                  type="text"
+                  value={formData.vendorFunction}
+                  onChange={(e) => updateFormData('vendorFunction', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Payment Processing, Data Analytics"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Internal Dependencies</label>
+                <input
+                  type="number"
+                  value={formData.internalDependencies}
+                  onChange={(e) => updateFormData('internalDependencies', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Number of internal systems dependent on this vendor"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Certifications</label>
+                <input
+                  type="text"
+                  value={formData.certifications}
+                  onChange={(e) => updateFormData('certifications', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., ISO 27001, SOC2, PCI DSS"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Security Frameworks</label>
+                <input
+                  type="text"
+                  value={formData.frameworks}
+                  onChange={(e) => updateFormData('frameworks', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., NIST, CIS Controls, COBIT"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800">Security Controls</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={formData.edrAv}
+                    onChange={(e) => updateFormData('edrAv', e.target.checked)}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">EDR/AV Solution</span>
+                </label>
+                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={formData.mdmByod}
+                    onChange={(e) => updateFormData('mdmByod', e.target.checked)}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">MDM/BYOD Policy</span>
+                </label>
+                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={formData.incidentResponsePlan}
+                    onChange={(e) => updateFormData('incidentResponsePlan', e.target.checked)}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Incident Response Plan</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Public IP Range</label>
+                <input
+                  type="text"
+                  value={formData.publicIp}
+                  onChange={(e) => updateFormData('publicIp', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 192.168.1.0/24"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">GitHub Organization</label>
+                <input
+                  type="text"
+                  value={formData.githubOrg}
+                  onChange={(e) => updateFormData('githubOrg', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., vendor-org/repo"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Known Subdomains</label>
+                <textarea
+                  value={formData.subdomains}
+                  onChange={(e) => updateFormData('subdomains', e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., api.vendor.com, admin.vendor.com"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4">Review Your Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><strong>Vendor Name:</strong> {formData.vendorName}</div>
+                <div><strong>Industry:</strong> {formData.industry}</div>
+                <div><strong>Country:</strong> {formData.country}</div>
+                <div><strong>Website:</strong> {formData.website}</div>
+                <div><strong>Employee Count:</strong> {formData.employeeCount}</div>
+                <div><strong>Asset Importance:</strong> {formData.assetImportance}</div>
+              </div>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-yellow-800">Ready to Submit</h4>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Once submitted, this vendor will be added to your portfolio and initial risk assessment will begin.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={onBack}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Add New Vendor</h1>
+            <p className="text-gray-600">Complete the vendor onboarding process</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Steps */}
+      <Card>
+        <div className="flex items-center justify-between p-2">
+          {steps.map((step, index) => (
+            <div key={step.id} className="flex items-center">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                currentStep >= step.id 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
+                {currentStep > step.id ? (
+                  <CheckCircle className="w-5 h-5" />
+                ) : (
+                  step.icon
+                )}
+              </div>
+              <div className="ml-3 min-w-0">
+                <p className={`text-sm font-medium ${
+                  currentStep >= step.id ? 'text-blue-600' : 'text-gray-500'
+                }`}>
+                  {step.title}
+                </p>
+              </div>
+              {index < steps.length - 1 && (
+                <div className={`ml-6 w-8 h-px ${
+                  currentStep > step.id ? 'bg-blue-600' : 'bg-gray-300'
+                }`} />
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Form Content */}
+      <Card>
+        <div className="p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+            {steps[currentStep - 1].title}
+          </h2>
+          {renderStepContent()}
+        </div>
+      </Card>
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={prevStep}
+          disabled={currentStep === 1}
+          className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Previous</span>
+        </button>
+
+        <div className="text-sm text-gray-500">
+          Step {currentStep} of {steps.length}
+        </div>
+
+        {currentStep === steps.length ? (
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Submitting...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Submit Vendor</span>
+              </>
+            )}
+          </button>
+        ) : (
+          <button
+            onClick={nextStep}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <span>Next</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
