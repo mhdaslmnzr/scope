@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   Shield, FileText, Globe, AlertTriangle, ArrowLeft, RefreshCw, EditIcon, FileDown,
-  Building, MapPin, Users as UsersIcon, Link as LinkIcon, BarChart3, Tag, Activity, FileUp
+  Building, MapPin, Users as UsersIcon, Link as LinkIcon, BarChart3, Tag, Activity, FileUp, Info
 } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { vendors, criticalityColors, scoreColors, riskColor } from '../mock-data';
@@ -39,6 +39,7 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
     { name: 'Reputation', color: 'red', icon: <AlertTriangle className="w-5 h-5 text-red-600" />, score: vendorData.scores.reputation, desc: 'Breach history, data leaks...' },
   ];
   const [loading, setLoading] = useState(true);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(t);
@@ -87,6 +88,171 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
     responsive: true,
     plugins: { legend: { display: false } },
     scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } },
+  };
+
+  // Function to generate general scoring factors for each risk category
+  const getScoringFactors = (category: string) => {
+    switch (category) {
+      // Cybersecurity Categories
+      case 'Vulnerability Management':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['CVE severity & count', 'Patch deployment speed', 'Vulnerability age', 'Remediation effectiveness', 'Automated scanning results']
+        };
+        
+      case 'Attack Surface':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Public IP ranges exposed', 'Number of subdomains', 'Open ports & services', 'External facing assets', 'Network segmentation']
+        };
+        
+      case 'Web/App Security':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Security headers presence', 'SSL/TLS configuration', 'Web app vulnerabilities', 'API security posture', 'Input validation']
+        };
+        
+      case 'Cloud & Infra':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Data center locations', 'Cloud security controls', 'Infrastructure hardening', 'Access management', 'Monitoring & logging']
+        };
+        
+      case 'Email Security':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['SPF/DKIM/DMARC', 'Phishing protection', 'Email filtering', 'Security awareness', 'Incident response']
+        };
+        
+      case 'Code Repo Exposure':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Repository access controls', 'Secret scanning results', 'Code quality metrics', 'Dependency vulnerabilities', 'Access permissions']
+        };
+        
+      case 'Endpoint Hygiene':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['EDR/AV deployment', 'MDM/BYOD policies', 'Patch management', 'Device encryption', 'Access controls']
+        };
+        
+      case 'IOC & Infra Threat':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Threat intelligence feeds', 'Infrastructure indicators', 'Malware detection', 'Network anomalies', 'Threat correlation']
+        };
+        
+      case 'Detection & Response':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Incident response plan', 'Detection capabilities', 'Response time metrics', 'Team expertise', 'Tool effectiveness']
+        };
+        
+      // Compliance Categories
+      case 'Certifications':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Certification validity', 'Audit results', 'Compliance gaps', 'Remediation status', 'Certification scope']
+        };
+        
+      case 'Questionnaire Quality':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Response completeness', 'Framework alignment', 'Risk assessment quality', 'Control documentation', 'Process maturity']
+        };
+        
+      case 'Regulatory Violations':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Regulatory requirements', 'Compliance status', 'Violation history', 'Remediation actions', 'Ongoing monitoring']
+        };
+        
+      case 'Privacy Compliance':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Privacy framework', 'Data protection measures', 'Consent management', 'Breach notification', 'Privacy by design']
+        };
+        
+      case 'Contractual Clauses':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Security requirements', 'SLA compliance', 'Liability clauses', 'Insurance coverage', 'Termination rights']
+        };
+        
+      // Geopolitical Categories
+      case 'Country Risk':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Political stability', 'Regulatory environment', 'Economic conditions', 'Cybersecurity maturity', 'International relations']
+        };
+        
+      case 'Sector Risk':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Industry regulations', 'Market volatility', 'Competitive landscape', 'Technology adoption', 'Risk tolerance']
+        };
+        
+      case 'Company Size':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Employee count', 'Revenue stability', 'Market position', 'Resource availability', 'Operational maturity']
+        };
+        
+      case 'Infra Jurisdiction':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Data center locations', 'Legal frameworks', 'Data sovereignty', 'Cross-border transfers', 'Regulatory compliance']
+        };
+        
+      case 'Concentration Risk':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Geographic concentration', 'Customer concentration', 'Technology dependency', 'Vendor concentration', 'Market concentration']
+        };
+        
+      case 'Environmental Exposure':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Climate risk factors', 'Natural disasters', 'Environmental regulations', 'Sustainability practices', 'Resource availability']
+        };
+        
+      // Reputation Categories
+      case 'Data Breach History':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Breach frequency', 'Data sensitivity', 'Response effectiveness', 'Customer impact', 'Regulatory fines']
+        };
+        
+      case 'Credential/Data Leaks':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Leak frequency', 'Data types exposed', 'Source attribution', 'Remediation speed', 'Prevention measures']
+        };
+        
+      case 'Brand Spoofing':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Impersonation attempts', 'Phishing campaigns', 'Brand protection', 'Customer awareness', 'Response effectiveness']
+        };
+        
+      case 'Dark Web Presence':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Dark web mentions', 'Underground activity', 'Threat actor interest', 'Data market presence', 'Monitoring capabilities']
+        };
+        
+      case 'Social Sentiment':
+        return {
+          title: 'Scoring Factors:',
+          factors: ['Social media sentiment', 'Customer reviews', 'Public perception', 'Crisis management', 'Brand reputation']
+        };
+        
+      default:
+        return {
+          title: 'Scoring Factors:',
+          factors: ['General scoring factors for this category']
+        };
+    }
   };
 
   return (
@@ -230,7 +396,34 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
                         ['Vulnerability Management', 'Attack Surface', 'Web/App Security', 'Cloud & Infra', 'Email Security', 'Code Repo Exposure', 'Endpoint Hygiene', 'IOC & Infra Threat', 'Detection & Response'].includes(item.category)
                       ).map((item: any) => (
                         <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-blue-50">
-                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2 font-medium text-gray-900">
+                            <div className="flex items-center gap-2">
+                              <span>{item.category}</span>
+                              <div className="relative">
+                                <Info 
+                                  className="w-4 h-4 text-gray-400 cursor-pointer hover:text-blue-600 transition-colors" 
+                                  onClick={() => setActiveTooltip(activeTooltip === item.category ? null : item.category)}
+                                />
+                                {activeTooltip === item.category && (
+                                  <div className="absolute bottom-full left-0 mb-2 bg-black text-white text-xs p-3 rounded-lg z-10 shadow-lg" style={{ width: '400px', minWidth: '400px' }}>
+                                    {(() => {
+                                      const scoringData = getScoringFactors(item.category);
+                                      return (
+                                        <div>
+                                          <div className="font-semibold mb-2">{scoringData.title}</div>
+                                          <ul className="list-disc pl-4 space-y-1">
+                                            {scoringData.factors.map((factor, index) => (
+                                              <li key={index} className="text-xs">{factor}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
                           <td className="py-2 px-2">
                             <div className="flex items-center space-x-3">
                               <div className="w-full bg-gray-200 rounded-full h-4">
@@ -265,7 +458,34 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
                         ['Certifications', 'Questionnaire Quality', 'Regulatory Violations', 'Privacy Compliance', 'Contractual Clauses'].includes(item.category)
                       ).map((item: any) => (
                         <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-green-50">
-                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2 font-medium text-gray-900">
+                            <div className="flex items-center gap-2">
+                              <span>{item.category}</span>
+                              <div className="relative">
+                                <Info 
+                                  className="w-4 h-4 text-gray-400 cursor-pointer hover:text-green-600 transition-colors" 
+                                  onClick={() => setActiveTooltip(activeTooltip === item.category ? null : item.category)}
+                                />
+                                {activeTooltip === item.category && (
+                                  <div className="absolute bottom-full left-0 mb-2 bg-black text-white text-xs p-3 rounded-lg z-10 shadow-lg" style={{ width: '400px', minWidth: '400px' }}>
+                                    {(() => {
+                                      const scoringData = getScoringFactors(item.category);
+                                      return (
+                                        <div>
+                                          <div className="font-semibold mb-2">{scoringData.title}</div>
+                                          <ul className="list-disc pl-4 space-y-1">
+                                            {scoringData.factors.map((factor, index) => (
+                                              <li key={index} className="text-xs">{factor}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
                           <td className="py-2 px-2">
                             <div className="flex items-center space-x-3">
                               <div className="w-full bg-gray-200 rounded-full h-4">
@@ -300,7 +520,34 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
                         ['Country Risk', 'Sector Risk', 'Company Size', 'Infra Jurisdiction', 'Concentration Risk', 'Environmental Exposure'].includes(item.category)
                       ).map((item: any) => (
                         <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-purple-50">
-                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2 font-medium text-gray-900">
+                            <div className="flex items-center gap-2">
+                              <span>{item.category}</span>
+                              <div className="relative">
+                                <Info 
+                                  className="w-4 h-4 text-gray-400 cursor-pointer hover:text-purple-600 transition-colors" 
+                                  onClick={() => setActiveTooltip(activeTooltip === item.category ? null : item.category)}
+                                />
+                                {activeTooltip === item.category && (
+                                  <div className="absolute bottom-full left-0 mb-2 bg-black text-white text-xs p-3 rounded-lg z-10 shadow-lg" style={{ width: '400px', minWidth: '400px' }}>
+                                    {(() => {
+                                      const scoringData = getScoringFactors(item.category);
+                                      return (
+                                        <div>
+                                          <div className="font-semibold mb-2">{scoringData.title}</div>
+                                          <ul className="list-disc pl-4 space-y-1">
+                                            {scoringData.factors.map((factor, index) => (
+                                              <li key={index} className="text-xs">{factor}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
                           <td className="py-2 px-2">
                             <div className="flex items-center space-x-3">
                               <div className="w-full bg-gray-200 rounded-full h-4">
@@ -335,7 +582,34 @@ export default function NewVendorDetails({ onBack, vendor }: { onBack: () => voi
                         ['Data Breach History', 'Credential/Data Leaks', 'Brand Spoofing', 'Dark Web Presence', 'Social Sentiment'].includes(item.category)
                       ).map((item: any) => (
                         <tr key={item.category} className="border-b border-gray-100 last:border-b-0 hover:bg-red-50">
-                          <td className="py-2 px-2 font-medium text-gray-900" title={item.category}>{item.category}</td>
+                          <td className="py-2 px-2 font-medium text-gray-900">
+                            <div className="flex items-center gap-2">
+                              <span>{item.category}</span>
+                              <div className="relative">
+                                <Info 
+                                  className="w-4 h-4 text-gray-400 cursor-pointer hover:text-red-600 transition-colors" 
+                                  onClick={() => setActiveTooltip(activeTooltip === item.category ? null : item.category)}
+                                />
+                                {activeTooltip === item.category && (
+                                  <div className="absolute bottom-full left-0 mb-2 bg-black text-white text-xs p-3 rounded-lg z-10 shadow-lg" style={{ width: '400px', minWidth: '400px' }}>
+                                    {(() => {
+                                      const scoringData = getScoringFactors(item.category);
+                                      return (
+                                        <div>
+                                          <div className="font-semibold mb-2">{scoringData.title}</div>
+                                          <ul className="list-disc pl-4 space-y-1">
+                                            {scoringData.factors.map((factor, index) => (
+                                              <li key={index} className="text-xs">{factor}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
                           <td className="py-2 px-2">
                             <div className="flex items-center space-x-3">
                               <div className="w-full bg-gray-200 rounded-full h-4">

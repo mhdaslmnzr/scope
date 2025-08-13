@@ -442,6 +442,174 @@ export default function CortexEngine() {
               </div>
             </Card>
           </div>
+
+          {/* Detailed Penalty Structure */}
+          <Card>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Detailed Penalty Structure & OSINT Sources</h3>
+            <p className="text-gray-600 mb-4">Comprehensive breakdown of how each component is scored with specific penalty values and data sources</p>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full border border-gray-200 rounded-lg">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Pillar</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Component</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">OSINT Data Sources</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Penalty Structure (Starting from 100)</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {/* Cybersecurity Row */}
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-blue-900 border-r border-gray-200" rowSpan={9}>Cybersecurity (9)</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Vulnerability Management</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">CVE databases (NVD, Mitre), Exploit DB, Vendor advisories</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-15 per unpatched critical CVE, -10 per unpatched high-severity CVE, -5 per old vuln (&gt;90 days), -20 per active exploit</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Attack Surface</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">DNS records, Subdomain scanners, Shodan, Censys</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-7 per exposed critical service, -10 per unauthorized subdomain, -8 per misconfig, -15 per sensitive interface exposed</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Web/Application Security</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">SSL Labs, Security header scanners, OWASP reports</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-20 for SSL/TLS grade below B, -10 per missing critical header, -15 per OWASP critical vuln, -5-10 for minor vulns</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Cloud & Infrastructure</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Cloud misconfig scanners (AWS Config), Black Duck, Open Buckets</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-20 per critical misconfig, -25 for public database, -10 per excessive IAM role</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Email Security</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">SPF/DKIM/DMARC checkers, Phishing databases</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-25 SPF fail, -25 DKIM fail, -30 DMARC fail, -20 per phishing incident</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Code Repository Exposure</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">GitHub leaks, Token scanners</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-30 per leaked token, -20 for public repo without controls, cumulative -10 for repeated leaks</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Endpoint Hygiene</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Endpoint management tools, device vulnerability scans</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-10 per outdated endpoint, -15 per insecure config, -5 per vulnerable device beyond threshold</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">IOC & Infra Threat</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Threat intelligence feeds (VirusTotal, MISP), Malware reports</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-15 per malware indicator, -20 if listed on multiple threat feeds, -25 per infra compromise</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Detection & Response</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">SOC reports, Incident response assessments</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-20 per unmitigated incident, -25 for low SOC maturity, -10 per response delay</td>
+                  </tr>
+
+                  {/* Compliance Row */}
+                  <tr className="bg-green-50">
+                    <td className="px-4 py-3 text-sm font-medium text-green-900 border-r border-gray-200" rowSpan={5}>Compliance (5)</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Certifications</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Certification bodies, Vendor disclosures</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-25 per missing critical cert, -15 per expired cert</td>
+                  </tr>
+                  <tr className="bg-green-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Questionnaire Quality</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Vendor surveys, Third-party audit results</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-10 per negative answer, -15 per missing section</td>
+                  </tr>
+                  <tr className="bg-green-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Regulatory Violations</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Public fines, Government disclosures</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-15 per minor violation, -30 per major violation/fine</td>
+                  </tr>
+                  <tr className="bg-green-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Privacy Compliance</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">GDPR, CCPA audit reports</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-20 per non-compliance issue, -30 for privacy breaches</td>
+                  </tr>
+                  <tr className="bg-green-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Contractual Clauses</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Contract repositories, Legal disclosures</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-15 per missing critical clause, -10 per weak clause</td>
+                  </tr>
+
+                  {/* Geopolitical Row */}
+                  <tr className="bg-purple-50">
+                    <td className="px-4 py-3 text-sm font-medium text-purple-900 border-r border-gray-200" rowSpan={6}>Geopolitical (6)</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Country Risk</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Political risk indices, Sanctions lists, Cyber threat reports</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-30 for high political risk, -40 for sanctions, -20 for elevated cyber threat</td>
+                  </tr>
+                  <tr className="bg-purple-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Sector Risk</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Industry threat advisories, Historical sector cyber events</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-25 for high threat industry, -15 for recent incidents</td>
+                  </tr>
+                  <tr className="bg-purple-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Company Size</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Public registries, Financial filings</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-10 for small size, -5 medium, 0 large</td>
+                  </tr>
+                  <tr className="bg-purple-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Infrastructure Jurisdiction</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Data sovereignty reports, Legal frameworks</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-25 for high risk jurisdiction, -15 moderate risk</td>
+                  </tr>
+                  <tr className="bg-purple-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Concentration Risk</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Supply chain maps, Vendor dependency data</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-30 for high dependency, -15 moderate</td>
+                  </tr>
+                  <tr className="bg-purple-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Environmental Exposure</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Geo hazard reports, Climate risk data</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-25 for high risk, -15 for moderate</td>
+                  </tr>
+
+                  {/* Reputation Row */}
+                  <tr className="bg-red-50">
+                    <td className="px-4 py-3 text-sm font-medium text-red-900 border-r border-gray-200" rowSpan={5}>Reputation (5)</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Data Breach History</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Breach databases (HIBP), News archives</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-20 per breach, -40 for large-scale breach</td>
+                  </tr>
+                  <tr className="bg-red-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Credential/Data Leaks</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Dark web monitoring platforms, Leak repositories</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-15 per leak, -20 additional for high privilege leaks</td>
+                  </tr>
+                  <tr className="bg-red-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Brand Spoofing</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Phishing watchlists, Domain fraud databases</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-20 per incident, -30 for major phishing campaigns</td>
+                  </tr>
+                  <tr className="bg-red-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Dark Web Presence</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Dark web monitoring services</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-15 per credible mention</td>
+                  </tr>
+                  <tr className="bg-red-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">Social Sentiment</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">Social media sentiment tools, News analysis</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">-10 for moderate negative sentiment, -25 for severe negative media coverage</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-semibold text-blue-900 mb-2">Key Scoring Principles</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• <strong>Base Score:</strong> All components start at 100 points</li>
+                <li>• <strong>Penalty Application:</strong> Deductions applied based on OSINT findings</li>
+                <li>• <strong>Cumulative Impact:</strong> Multiple violations compound penalties</li>
+                <li>• <strong>Source Verification:</strong> All penalties require verified OSINT data</li>
+                <li>• <strong>Dynamic Updates:</strong> Scores updated as new intelligence emerges</li>
+              </ul>
+            </div>
+          </Card>
         </div>
       )}
 
