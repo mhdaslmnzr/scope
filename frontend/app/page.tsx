@@ -66,10 +66,17 @@ export default function Home() {
   const [showUserModal, setShowUserModal] = useState(false);
   const [comparisonVendorIds, setComparisonVendorIds] = useState<string[]>([]);
   const [useNewDetailsView, setUseNewDetailsView] = useState(false);
+  const [visibleVendors, setVisibleVendors] = useState(vendors.slice(0, 9));
+
+  const handleVendorAdded = (newVendor: any) => {
+    // Add the new vendor to the visible vendors list
+    setVisibleVendors(prev => [...prev, newVendor]);
+    setView('vendors');
+  };
 
   const dashboardVendor = vendors[0];
 
-  const filteredVendors = vendors.filter(vendor =>
+  const filteredVendors = visibleVendors.filter(vendor =>
     vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     vendor.sector.toLowerCase().includes(searchQuery.toLowerCase()) ||
     vendor.country.toLowerCase().includes(searchQuery.toLowerCase())
@@ -182,15 +189,15 @@ const pillarGroups = [
               className="flex items-center space-x-3"
             >
               <div className="flex items-center justify-center">
-              <Image 
-                src="/images/logo.png" 
-                alt="SCOPE Logo" 
-                width={200} 
+              <Image
+                src="/images/logo.png"
+                alt="SCOPE Logo"
+                width={200}
                 height={40}
                 className="object-contain"
-              />
-            </div>
-            </button>
+            />
+        </div>
+              </button>
 
             {/* Center: Enhanced Search Bar with Live Results - More Compact */}
             <div className="flex-1 max-w-xl mx-6">
@@ -216,10 +223,10 @@ const pillarGroups = [
                       <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
-                    </button>
-        </div>
-                )}
-                
+            </button>
+          </div>
+      )}
+
                 {/* Live Search Results Dropdown */}
                 {searchQuery && filteredVendors.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-96 overflow-y-auto z-50 animate-slide-up">
@@ -323,8 +330,8 @@ const pillarGroups = [
                 {/* Quick Stats - Enhanced KPI Cards - More Compact */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {quickStats.map((stat, index) => (
-                    <Card 
-                      key={index} 
+                    <Card
+                      key={index}
                       className="group hover:scale-105 transition-all duration-300 hover:shadow-lg border-0 bg-gradient-to-br from-white to-gray-50"
                     >
                       <div className="flex items-center space-x-3 p-4">
@@ -504,8 +511,8 @@ const pillarGroups = [
                 {/* Risk Pillars - Enhanced Cards - More Compact */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {pillarGroups.map((pillar, index) => (
-                    <Card 
-                      key={index} 
+                    <Card
+                      key={index}
                       className="cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-300 group border-0 bg-gradient-to-br from-white to-gray-50"
                       onClick={() => {
                         setSelectedPillar(pillar.name);
@@ -638,7 +645,7 @@ const pillarGroups = [
                   setSelectedVendor(vendor);
                   setUseNewDetailsView(true);
                 }}
-                vendors={searchQuery ? filteredVendors : vendors}
+                vendors={searchQuery ? filteredVendors : visibleVendors}
                 searchQuery={searchQuery}
               />
             ) : view === 'vendors' && selectedVendor && useNewDetailsView ? (
@@ -757,7 +764,7 @@ const pillarGroups = [
             ) : view === 'cortex' ? (
               <CortexEngine />
             ) : view === 'add-vendor' ? (
-              <AddVendor onBack={() => setView('vendors')} />
+              <AddVendor onBack={() => setView('vendors')} onVendorAdded={handleVendorAdded} />
           ) : null}
         </div>
       </div>
