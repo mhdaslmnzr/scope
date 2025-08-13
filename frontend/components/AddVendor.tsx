@@ -103,7 +103,7 @@ export default function AddVendor({ onBack, onVendorAdded }: { onBack: () => voi
     
     // Create a unique fintech vendor using vendor 10's intelligence data as base
     const newVendor = {
-      ...vendor10Data, // Use ALL existing intelligence data (vulnerabilities, compliance, etc.)
+      ...vendor10Data, // Use existing intelligence data structure
       
       // Override with form data
       name: formData.vendorName,
@@ -113,18 +113,6 @@ export default function AddVendor({ onBack, onVendorAdded }: { onBack: () => voi
       criticality: formData.assetImportance,
       sector: 'Finance',
       tags: ['Fintech', 'Digital Banking', 'Payment Processing', 'APAC'],
-      
-      // Modify intelligence data to make it unique
-      vulnerabilities: vendor10Data.vulnerabilities?.map(v => ({
-        ...v,
-        count: Math.floor(v.count * (0.8 + Math.random() * 0.4)), // ±20% variation
-        lastScan: new Date().toISOString()
-      })) || [],
-      
-      complianceViolations: vendor10Data.complianceViolations?.map(v => ({
-        ...v,
-        date: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString() // Random date within last 90 days
-      })) || [],
       
       // Adjust scores based on form input for realism
       scores: {
@@ -221,7 +209,7 @@ export default function AddVendor({ onBack, onVendorAdded }: { onBack: () => voi
                 <div>
                   <h4 className="font-medium text-blue-900">Demo Mode - Real Intelligence Data</h4>
                   <p className="text-sm text-blue-700">
-                    This form creates a unique fintech vendor using real intelligence data (vulnerabilities, compliance, dark web presence) as a base. Your form choices will realistically affect the final risk scores.
+                    This form creates a unique fintech vendor using real intelligence data as a base. Your form choices will realistically affect the final risk scores.
                   </p>
                 </div>
               </div>
@@ -499,7 +487,7 @@ export default function AddVendor({ onBack, onVendorAdded }: { onBack: () => voi
                 <div>
                   <h4 className="font-medium text-green-800">Demo Mode - Intelligence-Driven Scoring</h4>
                   <p className="text-sm text-green-700 mt-1">
-                    This form will create a new fintech vendor with real intelligence data (vulnerabilities, compliance violations, dark web presence). Your form choices will realistically adjust the risk scores based on actual security controls and business factors.
+                    This form will create a new fintech vendor with real intelligence data. Your form choices will realistically adjust the risk scores based on actual security controls and business factors.
                   </p>
                 </div>
               </div>
